@@ -95,15 +95,21 @@ const VoiceAssistantPage = () => {
             if (!response.ok) {
                 let errorMessage = `Error ${response.status}: ${response.statusText}`;
                 try {
-                    // Try to parse JSON error details from backend
-                    const errorJson = await response.json();
-                    if (errorJson.detail) {
-                        errorMessage = `Server Error: ${errorJson.detail}`;
+                    // Read text once
+                    const errorText = await response.text();
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.detail) {
+                            errorMessage = `Server Error: ${errorJson.detail}`;
+                        } else {
+                            errorMessage += ` (${errorText.substring(0, 100)})`;
+                        }
+                    } catch (jsonError) {
+                        // Not JSON, use text
+                        if (errorText) errorMessage += ` (${errorText.substring(0, 100)})`;
                     }
                 } catch (e) {
-                    // Fallback to text if not JSON
-                    const errorText = await response.text();
-                    if (errorText) errorMessage += ` (${errorText.substring(0, 100)})`;
+                    console.error("Error reading error response", e);
                 }
 
                 console.error(`API Error:`, errorMessage);
