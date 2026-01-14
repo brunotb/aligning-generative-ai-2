@@ -41,6 +41,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+    state: dict = {}
 
 @app.get("/")
 @app.get("/api")
@@ -57,8 +58,8 @@ async def chat(request: ChatRequest):
                  raise HTTPException(status_code=500, detail=f"Agent Import Error: {import_error}")
              raise HTTPException(status_code=500, detail="Agent failed to initialize. Check logs.")
              
-        response_text = await agent.process_message(request.message, request.session_id)
-        return ChatResponse(response=response_text)
+        result = await agent.process_message(request.message, request.session_id)
+        return ChatResponse(response=result["response"], state=result["state"])
     except Exception as e:
         import traceback
         error_details = traceback.format_exc()
