@@ -16,22 +16,40 @@ const VoiceAssistantPage = () => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             recognition.current = new SpeechRecognition();
-            recognition.current.continuous = false;
+            recognition.current.continuous = true; // Keep listening even after pauses
             recognition.current.lang = 'en-US'; // Default to English for now, could switch
+            // Disable interimResults to prevent AI's own echo from triggering an interruption (Self-Interruption fix)
             recognition.current.interimResults = false;
 
-            recognition.current.onstart = () => setStatus('listening');
+            recognition.current.onstart = () => {
+                setStatus('listening');
+            };
+
             recognition.current.onend = () => {
-                if (status === 'listening') {
-                    // unexpected end, maybe silence
-                    // setStatus('idle'); 
+                // AUTO-RESTART: If we didn't explicitly stop (status is idle), restart.
+                // We use a helper 'isListeningDesired' ref or check status. 
+                // Here we simplify: if status is 'listening' or 'speaking' (meaning conversation is active), restart.
+                // We only want to stop if user hit the mute button (which sets status to idle).
+
+                if (statusRef.current !== 'idle') {
+                    console.log("Speech ended unexpectedly, restarting...");
+                    startListening();
                 }
             };
 
             recognition.current.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                setStatus('processing');
-                handleUserMessage(transcript);
+                const transcript = event.results[event.results.length - 1][0].transcript;
+
+                // INTERRUPTION: Only interrupt on FINAL results (since interim is off).
+                // This prevents short noises/echoes from cutting off the AI.
+                if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                    window.speechSynthesis.cancel();
+                }
+
+                if (transcript.trim()) {
+                    setStatus('processing');
+                    handleUserMessage(transcript);
+                }
             };
         }
 
@@ -44,23 +62,36 @@ const VoiceAssistantPage = () => {
         };
     }, []);
 
+    // Create a Ref for status to access inside closures (onend) without stale state
+    const statusRef = useRef(status);
+    useEffect(() => { statusRef.current = status; }, [status]);
+
     const speak = (text) => {
         if (!synth.current) return;
+
+        synth.current.cancel();
         setStatus('speaking');
+
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.onend = () => {
-            setStatus('idle');
-            startListening(); // Auto-listen after speaking
+            if (statusRef.current === 'speaking') {
+                // Even seamlessly, we ensure we are listening.
+                setStatus('listening');
+            }
         };
         synth.current.speak(utterance);
+
+        // Ensure listening is active during speech for barge-in
+        startListening();
     };
 
     const startListening = () => {
-        if (recognition.current && status !== 'listening') {
+        if (recognition.current) {
             try {
+                // Check if already started to avoid errors (though try/catch also catches it)
                 recognition.current.start();
             } catch (e) {
-                console.error("Already started", e);
+                // Ignore errors like "already started"
             }
         }
     };
