@@ -91,10 +91,18 @@ const VoiceAssistantPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: text, session_id: 'user-session-1' })
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
+                handleAIResponse(`I am sorry, I am having trouble connecting to the server. (Error ${response.status})`);
+                return;
+            }
+
             const data = await response.json();
             handleAIResponse(data.response);
         } catch (error) {
-            console.error("API Error", error);
+            console.error("Network/Parsing Error", error);
             handleAIResponse("I am sorry, I am having trouble connecting to the server.");
         }
     };
