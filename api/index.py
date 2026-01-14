@@ -23,6 +23,11 @@ agent = None
 import_error = None
 
 try:
+    import sys
+    import os
+    # Add the current directory to sys.path so we can import from siblings
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    
     from agent import BureaucracyAgent
     agent = BureaucracyAgent()
 except Exception as e:
