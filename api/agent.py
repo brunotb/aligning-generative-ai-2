@@ -5,20 +5,29 @@ from pdf_filler import fill_anmeldung_form
 
 class BureaucracyAgent:
     def __init__(self):
+        self.sessions = {}
+        self.model = None
+
+    def _initialize_model(self):
+        if self.model:
+            return
+            
         api_key = os.getenv("GOOGLE_API_KEY")
         if not api_key:
-            raise ValueError("GOOGLE_API_KEY not set")
+            print("Error: GOOGLE_API_KEY not set")
+            raise ValueError("GOOGLE_API_KEY environment variable is missing. Please set it in your Vercel project settings.")
         
-        genai.configure(api_key=api_key)
-        
-        # Tools configuration
-        self.tools = [fill_anmeldung_form]
-        
-        print(f"Initializing agent with model: gemini-flash-latest")
-        self.model = genai.GenerativeModel(
-            model_name='gemini-flash-latest',
-            tools=self.tools,
-            system_instruction="""You are a helpful, empathetic bureaucracy assistant for non-digital citizens in Germany. 
+        try:
+            genai.configure(api_key=api_key)
+            
+            # Tools configuration
+            self.tools = [fill_anmeldung_form]
+            
+            print(f"Initializing agent with model: gemini-flash-latest")
+            self.model = genai.GenerativeModel(
+                model_name='gemini-flash-latest',
+                tools=self.tools,
+                system_instruction="""You are a helpful, empathetic bureaucracy assistant for non-digital citizens in Germany. 
 Your goal is to help users complete the 'Anmeldung' (Residence Registration) form.
 Speak in simple, clear language. You can speak English or German.
 Guide the user step-by-step. Ask for one piece of information at a time.
@@ -26,10 +35,13 @@ Verify the information with the user before calling the tool.
 Once you have all necessary details (Name, Current Address, Move-in Date, Date of Birth, Nationality, Previous Address), 
 call the 'fill_anmeldung_form' function.
 """
-        )
-        self.sessions = {}
+            )
+        except Exception as e:
+            print(f"Failed to initialize Gemini model: {e}")
+            raise e
 
     def get_chat(self, session_id: str):
+        self._initialize_model()
         if session_id not in self.sessions:
             self.sessions[session_id] = self.model.start_chat(enable_automatic_function_calling=True)
         return self.sessions[session_id]
