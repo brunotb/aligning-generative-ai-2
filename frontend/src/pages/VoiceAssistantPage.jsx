@@ -118,6 +118,9 @@ const VoiceAssistantPage = () => {
             }
 
             const data = await response.json();
+            if (data.state) {
+                setSummary(data.state);
+            }
             handleAIResponse(data.response);
         } catch (error) {
             console.error("Network/Parsing Error", error);
@@ -213,14 +216,79 @@ const VoiceAssistantPage = () => {
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN: Summary / Context Sidebar (Static for now) */}
-                <div className="hidden lg:flex flex-col flex-1 lg:max-w-md w-full opacity-50 pointer-events-none">
-                    {/* ... (Summary simplified/hidden for prototype focus on voice) ... */}
-                    <p className="text-center mt-10">Real-time summary updates coming soon.</p>
+                {/* RIGHT COLUMN: Summary / Context Sidebar */}
+                <div className="hidden lg:flex flex-col flex-1 lg:max-w-md w-full">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl h-full flex flex-col">
+                        <div className="mb-6">
+                            <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Summary</h3>
+                            <p className="text-slate-500 text-sm">What I have learned so far</p>
+                        </div>
+
+                        <div className="flex flex-col gap-4 grow">
+                            {/* Summary Items */}
+                            <SummaryItem
+                                icon="person"
+                                label="NAME"
+                                value={summary.name}
+                                isAsking={false}
+                            />
+                            <SummaryItem
+                                icon="location_city"
+                                label="CITY"
+                                value={summary.city}
+                                isAsking={false}
+                            />
+                            <SummaryItem
+                                icon="home"
+                                label="ADDRESS"
+                                value={summary.address}
+                                isAsking={false}
+                            />
+                            <SummaryItem
+                                icon="calendar_month"
+                                label="DATE OF BIRTH"
+                                value={summary.date_of_birth}
+                                isAsking={!summary.date_of_birth && summary.name} // Heuristic for demo
+                            />
+                        </div>
+
+                        {/* Progress */}
+                        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+                            <div className="flex justify-between items-end mb-2">
+                                <span className="font-bold text-slate-700 dark:text-slate-300">Form Completion</span>
+                                <span className="font-bold text-primary">{summary.progress || 0}%</span>
+                            </div>
+                            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+                                <div
+                                    className="bg-primary h-full rounded-full transition-all duration-1000 ease-out"
+                                    style={{ width: `${summary.progress || 0}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>
     );
 };
+
+const SummaryItem = ({ icon, label, value, isAsking }) => (
+    <div className={`p-4 rounded-xl border transition-all duration-300 flex items-center gap-4 ${value ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm' : isAsking ? 'bg-slate-50 dark:bg-slate-800/50 border-dashed border-slate-300 dark:border-slate-700' : 'bg-transparent border-transparent opacity-50'}`}>
+        <div className={`size-12 rounded-full flex items-center justify-center shrink-0 ${value ? 'bg-primary/10 text-primary' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>
+            <span className="material-symbols-outlined">{icon}</span>
+        </div>
+        <div className="flex flex-col grow">
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</span>
+            <span className={`font-semibold text-lg truncate ${value ? 'text-slate-900 dark:text-white' : 'text-slate-400 italic'}`}>
+                {value || (isAsking ? "Asking now..." : "Pending")}
+            </span>
+        </div>
+        {value && (
+            <div className="size-6 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0">
+                <span className="material-symbols-outlined text-sm font-bold">check</span>
+            </div>
+        )}
+    </div>
+);
 
 export default VoiceAssistantPage;
