@@ -52,6 +52,11 @@ async def chat(request: ChatRequest):
         # Return the actual error to the client for debugging
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
+@app.get("/ping")
+@app.get("/api/ping")
+def ping():
+    return {"status": "pong"}
+
 @app.get("/reset")
 @app.get("/api/reset")
 def reset_session(session_id: str = "default"):

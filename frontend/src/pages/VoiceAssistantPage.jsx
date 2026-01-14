@@ -115,7 +115,7 @@ const VoiceAssistantPage = () => {
             handleAIResponse(data.response);
         } catch (error) {
             console.error("Network/Parsing Error", error);
-            handleAIResponse("I am sorry, I am having trouble connecting to the server.");
+            handleAIResponse(`I am sorry, I am having trouble connecting to the server. \n\nCatch Error: ${error.name}: ${error.message}`);
         }
     };
 
