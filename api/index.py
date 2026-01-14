@@ -5,8 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-from agent import BureaucracyAgent
-
 load_dotenv()
 
 app = FastAPI(title="Amt-Assistent Backend")
@@ -21,7 +19,16 @@ app.add_middleware(
 )
 
 # Initialize Agent
-agent = BureaucracyAgent()
+agent = None
+import_error = None
+
+try:
+    from agent import BureaucracyAgent
+    agent = BureaucracyAgent()
+except Exception as e:
+    import traceback
+    import_error = traceback.format_exc()
+    print(f"FAILED TO LOAD AGENT: {import_error}")
 
 class ChatRequest(BaseModel):
     message: str
@@ -41,6 +48,8 @@ async def chat(request: ChatRequest):
     try:
         # Lazy load agent if not already done
         if agent is None:
+             if import_error:
+                 raise HTTPException(status_code=500, detail=f"Agent Import Error: {import_error}")
              raise HTTPException(status_code=500, detail="Agent failed to initialize. Check logs.")
              
         response_text = await agent.process_message(request.message, request.session_id)
