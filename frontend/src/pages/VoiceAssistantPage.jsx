@@ -248,7 +248,7 @@ const VoiceAssistantPage = () => {
                 </div>
 
                 {/* RIGHT COLUMN: Summary / Context Sidebar */}
-                <div className="hidden lg:flex flex-col flex-1 lg:max-w-md w-full">
+                <div className="flex flex-col flex-1 lg:max-w-md w-full">
                     <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-200 dark:border-slate-800 shadow-xl h-full flex flex-col">
                         <div className="mb-6">
                             <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Summary</h3>
