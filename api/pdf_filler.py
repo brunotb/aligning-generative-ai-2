@@ -39,7 +39,8 @@ def fill_anmeldung_form(
     # In a real app, we would use pypdf to fill the form.
     # For this prototype, we will save the data to a JSON file to verify it worked.
     
-    output_dir = "filled_forms"
+    # Use /tmp for serverless environments (like Vercel) where other paths are read-only
+    output_dir = "/tmp"
     os.makedirs(output_dir, exist_ok=True)
     
     filename = f"{output_dir}/anmeldung_{full_name.replace(' ', '_')}.json"

@@ -93,9 +93,21 @@ const VoiceAssistantPage = () => {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
-                handleAIResponse(`I am sorry, I am having trouble connecting to the server. (Error ${response.status})`);
+                let errorMessage = `Error ${response.status}: ${response.statusText}`;
+                try {
+                    // Try to parse JSON error details from backend
+                    const errorJson = await response.json();
+                    if (errorJson.detail) {
+                        errorMessage = `Server Error: ${errorJson.detail}`;
+                    }
+                } catch (e) {
+                    // Fallback to text if not JSON
+                    const errorText = await response.text();
+                    if (errorText) errorMessage += ` (${errorText.substring(0, 100)})`;
+                }
+
+                console.error(`API Error:`, errorMessage);
+                handleAIResponse(`I am sorry, I am having trouble connecting to the server. \n\nDebug Info: ${errorMessage}`);
                 return;
             }
 

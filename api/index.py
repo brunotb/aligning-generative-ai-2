@@ -39,10 +39,18 @@ def read_root():
 @app.post("/api/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
+        # Lazy load agent if not already done
+        if agent is None:
+             raise HTTPException(status_code=500, detail="Agent failed to initialize. Check logs.")
+             
         response_text = await agent.process_message(request.message, request.session_id)
         return ChatResponse(response=response_text)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"CRITICAL ERROR: {error_details}")
+        # Return the actual error to the client for debugging
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 @app.get("/reset")
 @app.get("/api/reset")
