@@ -53,14 +53,17 @@ RELIGION_VALUES = {
     18: "jh",    # Jüdische Gemeinde Hamburg
     19: "isrp",  # Jüdische Kultusgemeinden Bad Kreuznach und Koblenz
     20: "issl",  # Saarland: israelitisch
-    21: "oa"     # keiner öffentlich-rechtlichen Religionsgesellschaft angehörig
+    21: "oa",    # keiner öffentlich-rechtlichen Religionsgesellschaft angehörig
+    22: "other"  # other / unspecified
 }
 
 ID_TYPE_VALUES = {
     0: "PA",     # Personalausweis
     1: "RP",     # Reisepass
     2: "KRP",    # Kinderreisepass
-    3: "KA"      # Kinderausweis
+    3: "KA",     # Kinderausweis
+    4: "AKN",    # Ankunftsnachweis (arrival document)
+    5: "OTHER"   # Other / unspecified
 }
 
 HOUSING_TYPE_VALUES = {
@@ -248,7 +251,7 @@ def _validate_religion(value: int, person_num: int) -> int:
         value,
         f"Person {person_num} Religion (rel{person_num})",
         min_val=0,
-        max_val=21
+        max_val=22
     )
     return rel_idx
 
@@ -271,7 +274,7 @@ def _validate_id_type(value: int, person_num: int) -> int:
         value,
         f"Person {person_num} ID Type (art{person_num})",
         min_val=0,
-        max_val=3
+        max_val=5
     )
     return art_idx
 
@@ -504,10 +507,10 @@ def _validate_separation_status(data: Dict) -> None:
 def _validate_signature_fields(data: Dict) -> None:
     """
     Validate signature location and date fields.
-    
+
     Args:
         data: Complete form data
-        
+
     Raises:
         ValueError: If signature fields are invalid
     """
@@ -516,12 +519,124 @@ def _validate_signature_fields(data: Dict) -> None:
             data.get("Ort1"),
             "Signature Location (Ort1)"
         )
-    
+
     if "Datum1" in data and data["Datum1"]:
         _validate_date_format(
             data.get("Datum1"),
             "Signature Date (Datum1)"
         )
+
+    # Also validate generic signature/location fields used in other sections
+    if "Ort" in data and data["Ort"]:
+        _validate_string_field(
+            data.get("Ort"),
+            "Signature Location (Ort)"
+        )
+
+    if "Datum" in data and data["Datum"]:
+        _validate_date_format(
+            data.get("Datum"),
+            "Signature Date (Datum)"
+        )
+
+
+def _validate_non_moving_partner(data: Dict) -> None:
+    """
+    Validate fields for a non-moving spouse/partner (suffix 5).
+    """
+    # If any non-moving partner fields are present, validate their expected types
+    keys_present = any(k.startswith("fam5") or k.startswith("vorn5") or k.startswith("gebdat5")
+                       or k.startswith("gebort5") or k.startswith("anschr5") for k in data.keys())
+    if not keys_present:
+        return
+
+    # Validate strings
+    if "fam5" in data and data["fam5"]:
+        _validate_string_field(data.get("fam5"), "Non-moving partner Family Name (fam5)")
+    if "vorn5" in data and data["vorn5"]:
+        _validate_string_field(data.get("vorn5"), "Non-moving partner First Name (vorn5)")
+    if "name5" in data and data["name5"]:
+        _validate_string_field(data.get("name5"), "Non-moving partner Previous Name (name5)")
+    if "gr5" in data and data["gr5"]:
+        _validate_string_field(data.get("gr5"), "Non-moving partner Doctorate (gr5)")
+    if "anschr5" in data and data["anschr5"]:
+        _validate_string_field(data.get("anschr5"), "Non-moving partner Address (anschr5)")
+    if "anschr5a" in data and data["anschr5a"]:
+        _validate_string_field(data.get("anschr5a"), "Non-moving partner Address (anschr5a)")
+
+    # Gender: the PDF oddly names this 'geschl6' - accept either geschl5 or geschl6
+    if "geschl5" in data:
+        _validate_gender(data.get("geschl5"), 5)
+    if "geschl6" in data:
+        _validate_gender(data.get("geschl6"), 5)
+
+    # Birth date and place
+    if "gebdat5" in data and data["gebdat5"]:
+        _validate_date_format(data.get("gebdat5"), "Non-moving partner Birth Date (gebdat5)")
+    if "gebort5" in data and data["gebort5"]:
+        _validate_string_field(data.get("gebort5"), "Non-moving partner Birth Place (gebort5)")
+
+
+def _validate_power_of_attorney(data: Dict) -> None:
+    """
+    Validate power-of-attorney / delegate fields.
+    """
+    if "fam_vg" in data and data["fam_vg"]:
+        _validate_string_field(data.get("fam_vg"), "Power of attorney - Grantor Family Name (fam_vg)")
+    if "vorname_vg" in data and data["vorname_vg"]:
+        _validate_string_field(data.get("vorname_vg"), "Power of attorney - Grantor First Name (vorname_vg)")
+    if "geb_vg" in data and data["geb_vg"]:
+        _validate_date_format(data.get("geb_vg"), "Power of attorney - Grantor Birth Date (geb_vg)")
+
+    if "fam_bev" in data and data["fam_bev"]:
+        _validate_string_field(data.get("fam_bev"), "Power of attorney - Agent Family Name (fam_bev)")
+    if "vorname_bev" in data and data["vorname_bev"]:
+        _validate_string_field(data.get("vorname_bev"), "Power of attorney - Agent First Name (vorname_bev)")
+    if "geb_bev" in data and data["geb_bev"]:
+        _validate_date_format(data.get("geb_bev"), "Power of attorney - Agent Birth Date (geb_bev)")
+    if "anschrift_bev" in data and data["anschrift_bev"]:
+        _validate_string_field(data.get("anschrift_bev"), "Power of attorney - Agent Address (anschrift_bev)")
+
+
+def _validate_optional_person_fields(data: Dict) -> None:
+    """
+    Validate optional person-specific fields for persons 1-4.
+    
+    These fields are optional but should be validated if present:
+    - ordenskuenstler1-4: Stage/stage name (Künstlername)
+    - vertrieb1-4: Refugee/displaced person status (Vertriebenengenschaft)
+    - name1-4: Previous family name (maiden name, etc.)
+    
+    Args:
+        data: Complete form data
+        
+    Raises:
+        ValueError: If any optional person field is invalid
+    """
+    # Validate optional fields for persons 1-4
+    for person_num in range(1, 5):
+        suffix = str(person_num)
+        
+        # Stage name / artist name
+        if f"ordenskuenstler{suffix}" in data and data[f"ordenskuenstler{suffix}"]:
+            _validate_string_field(
+                data.get(f"ordenskuenstler{suffix}"),
+                f"Person {person_num} Stage Name (ordenskuenstler{suffix})"
+            )
+        
+        # Refugee/displaced person status
+        if f"vertrieb{suffix}" in data and data[f"vertrieb{suffix}"]:
+            _validate_string_field(
+                data.get(f"vertrieb{suffix}"),
+                f"Person {person_num} Refugee Status (vertrieb{suffix})"
+            )
+        
+        # Previous family name (before marriage, etc.)
+        if f"name{suffix}" in data and data[f"name{suffix}"]:
+            _validate_string_field(
+                data.get(f"name{suffix}"),
+                f"Person {person_num} Previous Family Name (name{suffix})"
+            )
 
 
 def _validate_cross_field_rules(data: Dict) -> None:
@@ -606,6 +721,34 @@ def validate_anmeldung_data(data: Dict) -> Dict:
         _validate_signature_fields(data)
     except ValueError as e:
         errors.append(str(e))
+
+    # Optional: non-moving partner block (fam5 / related fields)
+    try:
+        _validate_non_moving_partner(data)
+    except ValueError as e:
+        errors.append(str(e))
+
+    # Optional: power of attorney / delegate fields
+    try:
+        _validate_power_of_attorney(data)
+    except ValueError as e:
+        errors.append(str(e))
+    
+    # Optional: optional person fields (stage names, refugee status, previous names)
+    try:
+        _validate_optional_person_fields(data)
+    except ValueError as e:
+        errors.append(str(e))
+    
+    # Optional: legal representative field (gesetzlver)
+    if "gesetzlver" in data and data["gesetzlver"]:
+        try:
+            _validate_string_field(
+                data.get("gesetzlver"),
+                "Legal Representative (gesetzlver)"
+            )
+        except ValueError as e:
+            errors.append(str(e))
     
     # Validate cross-field rules
     try:
@@ -638,27 +781,56 @@ def fill_anmeldung_form(
     
     Args:
         form_data: Dictionary containing form data with keys matching the PDF fields.
-                   Required keys:
+                   
+                   REQUIRED KEYS:
                    - einzug: Move-in date (DD.MM.YYYY)
                    - neuw.strasse: New address street
                    - nw.plz: New address ZIP code
                    - wohnung: Housing type (0=single, 1=main, 2=secondary)
-                   - fam1-4: Family names (at least fam1 required)
-                   - vorn1-4: First names (at least vorn1 required)
-                   - gebdat1-4: Birth dates (at least gebdat1 required)
-                   - gebort1-4: Birth places (at least gebort1 required)
-                   - geschl1-4: Gender codes (at least geschl1 required)
-                   - famst1-4: Family status codes (at least famst1 required)
-                   - staatsang1-4: Nationalities (at least staatsang1 required)
-                   - rel1-4: Religion codes (at least rel1 required)
-                   Optional keys:
-                   - gr1-4: Academic degrees
-                   - dat1-4: Marriage/partnership dates
-                   - art1-4, serien1-4, ausstellb1-4, ausstelldat1-4, gueltig1-4: Passport data
+                   - fam1: Family name of person 1
+                   - vorn1: First name of person 1
+                   - gebdat1: Birth date of person 1 (DD.MM.YYYY)
+                   - gebort1: Birth place of person 1
+                   - geschl1: Gender code for person 1 (0=M, 1=F, 2=D, 3=X)
+                   - famst1: Family status code for person 1 (0-9)
+                   - staatsang1: Nationality of person 1
+                   - rel1: Religion code for person 1 (0-22)
+                   
+                   OPTIONAL KEYS (for persons 1-4):
+                   - fam2-4, vorn2-4, gebdat2-4, gebort2-4: Additional persons
+                   - geschl2-4, famst2-4, staatsang2-4, rel2-4: Additional persons details
+                   - gr1-4: Academic degrees (Doktortitel)
+                   - ordenskuenstler1-4: Stage/artist names
+                   - name1-4: Previous family names (maiden names, etc.)
+                   - vertrieb1-4: Refugee/displaced person status (0 or 1)
+                   - dat1-4: Marriage/partnership dates (DD.MM.YYYY)
+                   - art1-4: ID types (0-5)
+                   - serien1-4: ID series numbers
+                   - ausstelldat1-4: ID issue dates (DD.MM.YYYY)
+                   - gueltig1-4: ID expiration dates (DD.MM.YYYY)
+                   
+                   OPTIONAL KEYS (address):
+                   - nw.ort: New address city
                    - zuzug: Previous address if moving from abroad
-                   - bishwo.strasse, bishwo.plz, bishwo.ort: Previous German address
-                   - getrennt1: Separation status
-                   - Ort1, Datum1: Signature location and date
+                   - bishwo.strasse: Previous German address street
+                   - bishwo.plz: Previous German address ZIP
+                   - bishwo.ort: Previous German address city
+                   
+                   OPTIONAL KEYS (special):
+                   - getrennt1: Separation status for person 1
+                   - Ort1: Signature location
+                   - Datum1: Signature date (DD.MM.YYYY)
+                   - gesetzlver: Legal representative name
+                   
+                   OPTIONAL KEYS (non-moving partner - block 5):
+                   - fam5, vorn5, gebdat5, gebort5: Non-moving partner info
+                   - geschl5 or geschl6: Non-moving partner gender
+                   - gr5: Non-moving partner academic degree
+                   - anschr5, anschr5a: Non-moving partner address
+                   
+                   OPTIONAL KEYS (power of attorney):
+                   - fam_vg, vorname_vg, geb_vg: Grantor (person giving power)
+                   - fam_bev, vorname_bev, geb_bev, anschrift_bev: Attorney-in-fact
         
         pdf_template_path: Path to the PDF template file (default: documents/Anmeldung_Meldeschein_20220622.pdf)
         

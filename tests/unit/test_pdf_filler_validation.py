@@ -217,7 +217,7 @@ def test_validation_multiple_persons():
     }
     
     try:
-        validated = validate_anmeldung_data(data)
+        validate_anmeldung_data(data)
         print("✓ Test 7 PASSED: Multiple persons validation passed")
         return True
     except ValueError as e:
@@ -263,6 +263,180 @@ def test_validation_mismatched_marriage_dates():
         return True
 
 
+def test_validation_non_moving_partner_and_power_of_attorney():
+    """Test validation for non-moving partner and power of attorney fields."""
+    data = {
+        "einzug": "15.01.25",
+        "neuw.strasse": "Leopoldstraße 25 a",
+        "nw.plz": "80802",
+        "wohnung": 0,
+        "fam1": "Müller",
+        "vorn1": "Hans",
+        "geschl1": 0,
+        "famst1": 0,
+        "gebdat1": "01.01.1990",
+        "gebort1": "München",
+        "staatsang1": "Deutsch",
+        "rel1": 8,
+        # Non-moving partner
+        "fam5": "Schmidt",
+        "vorn5": "Anna",
+        "geschl6": 1,
+        "gebdat5": "02.02.1988",
+        "gebort5": "Berlin",
+        # Power of attorney
+        "fam_vg": "Meier",
+        "vorname_vg": "Lena",
+        "geb_vg": "05.05.1975",
+        "fam_bev": "Koch",
+        "vorname_bev": "Peter",
+        "geb_bev": "10.10.1980",
+        "anschrift_bev": "Bahnhofstr. 1, 80333 München",
+    }
+    
+    try:
+        validate_anmeldung_data(data)
+        print("✓ Test 9 PASSED: Non-moving partner & POA validation passed")
+        return True
+    except ValueError as e:
+        print(f"✗ Test 9 FAILED: {e}")
+        return False
+
+
+def test_validation_non_moving_partner_invalid_gender():
+    """Test validation fails when non-moving partner gender is out of range."""
+    data = {
+        "einzug": "15.01.25",
+        "neuw.strasse": "Leopoldstraße 25 a",
+        "nw.plz": "80802",
+        "wohnung": 0,
+        "fam1": "Müller",
+        "vorn1": "Hans",
+        "geschl1": 0,
+        "famst1": 0,
+        "gebdat1": "01.01.1990",
+        "gebort1": "München",
+        "staatsang1": "Deutsch",
+        "rel1": 8,
+        # Non-moving partner with invalid gender value
+        "fam5": "Schmidt",
+        "vorn5": "Anna",
+        "geschl6": 9,  # Invalid
+        "gebdat5": "02.02.1988",
+        "gebort5": "Berlin",
+    }
+    
+    try:
+        validate_anmeldung_data(data)
+        print("✗ Test 10 FAILED: Should have rejected invalid non-moving partner gender")
+        return False
+    except ValueError as e:
+        print(f"✓ Test 10 PASSED: Correctly rejected invalid gender: {str(e)[:100]}...")
+        return True
+
+
+def test_validation_optional_person_fields():
+    """Test validation of optional person fields (stage name, refugee status, previous name)."""
+    data = {
+        "einzug": "15.01.25",
+        "neuw.strasse": "Leopoldstraße 25",
+        "nw.plz": "80802",
+        "wohnung": 0,
+        "fam1": "Mueller",
+        "vorn1": "Hans",
+        "geschl1": 0,
+        "famst1": 0,
+        "gebdat1": "05.05.1980",
+        "gebort1": "Munich",
+        "staatsang1": "German",
+        "rel1": 0,
+        # Optional person fields
+        "ordenskuenstler1": "Hans the Great",  # Stage name
+        "vertrieb1": "Berlin, Preussen",  # Refugee status
+        "name1": "Mueller-Schmidt",  # Previous name
+        # Optional fields for person 2
+        "fam2": "Schmidt",
+        "vorn2": "Lisa",
+        "geschl2": 1,
+        "famst2": 0,
+        "gebdat2": "06.06.1985",
+        "gebort2": "Berlin",
+        "staatsang2": "German",
+        "rel2": 0,
+        "ordenskuenstler2": "Lisa Star",
+        "vertrieb2": "Dresden, Sachsen",
+        "name2": "Schmidt-Klein",
+        "Ort1": "Munich",
+        "Datum1": "15.01.2025"
+    }
+    
+    try:
+        validate_anmeldung_data(data)
+        print("✓ Test 11 PASSED: Optional person fields validated correctly")
+        return True
+    except ValueError as e:
+        print(f"✗ Test 11 FAILED: {str(e)[:150]}...")
+        return False
+
+
+def test_validation_invalid_refugee_status():
+    """Test that invalid refugee status (vertrieb) is rejected."""
+    data = {
+        "einzug": "15.01.25",
+        "neuw.strasse": "Leopoldstraße 25",
+        "nw.plz": "80802",
+        "wohnung": 0,
+        "fam1": "Mueller",
+        "vorn1": "Hans",
+        "geschl1": 0,
+        "famst1": 0,
+        "gebdat1": "05.05.1980",
+        "gebort1": "Munich",
+        "staatsang1": "German",
+        "rel1": 0,
+        "vertrieb1": "",  # Invalid: cannot be empty string
+        "Ort1": "Munich",
+        "Datum1": "15.01.2025"
+    }
+    
+    try:
+        validate_anmeldung_data(data)
+        print("✗ Test 12 FAILED: Should have rejected invalid refugee status")
+        return False
+    except ValueError as e:
+        print(f"✓ Test 12 PASSED: Correctly rejected invalid refugee status: {str(e)[:100]}...")
+        return True
+
+
+def test_validation_legal_representative():
+    """Test validation of legal representative field (gesetzlver)."""
+    data = {
+        "einzug": "15.01.25",
+        "neuw.strasse": "Leopoldstraße 25",
+        "nw.plz": "80802",
+        "wohnung": 0,
+        "fam1": "Mueller",
+        "vorn1": "Hans",
+        "geschl1": 0,
+        "famst1": 0,
+        "gebdat1": "05.05.1980",
+        "gebort1": "Munich",
+        "staatsang1": "German",
+        "rel1": 0,
+        "gesetzlver": "Dr. Schmidt & Partner GmbH",
+        "Ort1": "Munich",
+        "Datum1": "15.01.2025"
+    }
+    
+    try:
+        validate_anmeldung_data(data)
+        print("✓ Test 13 PASSED: Legal representative field validated correctly")
+        return True
+    except ValueError as e:
+        print(f"✗ Test 13 FAILED: {str(e)[:150]}...")
+        return False
+
+
 def run_all_tests():
     """Run all tests and report results."""
     print("\n" + "="*70)
@@ -278,6 +452,11 @@ def run_all_tests():
         test_validation_married_without_date,
         test_validation_multiple_persons,
         test_validation_mismatched_marriage_dates,
+        test_validation_non_moving_partner_and_power_of_attorney,
+        test_validation_non_moving_partner_invalid_gender,
+        test_validation_optional_person_fields,
+        test_validation_invalid_refugee_status,
+        test_validation_legal_representative,
     ]
     
     results = [test() for test in tests]

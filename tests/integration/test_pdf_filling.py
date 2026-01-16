@@ -40,6 +40,9 @@ INTERNATIONAL_FAMILY_DATA = {
     "gebdat1": "10.06.1985",
     "gebort1": "São Paulo, Brasilien",
     "dat1": "10.08.2015, Rom",
+    "ordenskuenstler1": "Maria Grande",  # Stage name
+    "name1": "von Gräfenberg-Silva",  # Previous name
+    "vertrieb1": 0,  # Not refugee status
 
     # --- SECTION 4: PERSON 2 (The Spouse) ---
     "fam2": "Müller",
@@ -52,6 +55,9 @@ INTERNATIONAL_FAMILY_DATA = {
     "gebdat2": "15.03.1982",
     "gebort2": "München",
     "dat2": "10.08.2015, Rom",
+    "ordenskuenstler2": "",  # No stage name
+    "name2": "Müller-König",  # Previous name
+    "vertrieb2": "Mainz, Rheinland-Pfalz",
 
     # --- SECTION 5: PERSON 3 (The Child) ---
     "fam3": "Müller-Gräfenberg",
@@ -62,6 +68,8 @@ INTERNATIONAL_FAMILY_DATA = {
     "famst3": 0,   # Single (LD)
     "rel3": 21,    # oa (Ohne Angabe / None)
     "staatsang3": "Brasilianisch",
+    "ordenskuenstler3": "Alex Star",  # Stage name
+    "vertrieb3": "Breslau, Schlesien",
 
     # --- SECTION 6: PASSPORTS (ID Types) ---
     "art1": 0,
@@ -81,7 +89,27 @@ INTERNATIONAL_FAMILY_DATA = {
 
     # --- SECTION 8: SIGNATURE ---
     "Ort1": "München",
-    "Datum1": "15.01.2025"
+    "Datum1": "15.01.2025",
+
+    # --- SECTION 9: LEGAL REPRESENTATIVE ---
+    "gesetzlver": "Dr. Schmidt & Partner Rechtsanwälte GmbH",
+
+    # --- NON-MOVING PARTNER ---
+    "fam5": "Schmidt",
+    "vorn5": "Anna",
+    "geschl6": 1,
+    "gebdat5": "02.02.1988",
+    "gebort5": "Berlin",
+    "gr5": "Prof. Dr.",
+
+    # --- POWER OF ATTORNEY ---
+    "fam_vg": "Meier",
+    "vorname_vg": "Lena",
+    "geb_vg": "05.05.1975",
+    "fam_bev": "Koch",
+    "vorname_bev": "Peter",
+    "geb_bev": "10.10.1980",
+    "anschrift_bev": "Bahnhofstr. 1, 80333 München"
 }
 
 SIMPLE_PERSON_DATA = {
