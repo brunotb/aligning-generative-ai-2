@@ -1,6 +1,9 @@
 fastapi
 uvicorn
 google-generativeai
+PyPDFForm
 pypdf
 python-multipart
 python-dotenv
+pytest
+pytest-cov
