@@ -9,10 +9,16 @@ pyaudio>=0.2.13
 # PDF manipulation
 PyPDFForm>=1.5.1
 
+# Web API
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+websockets>=14.0
+python-multipart>=0.0.20
+
 # Testing
 pytest>=9.0.0
 pytest-cov>=7.0.0
-pytest-Faker>=40.1.2
+# pytest-Faker>=40.1.2
 
 # Optional: Document processing (if needed for extending functionality)
-docling>=2.0.0
+# docling>=2.0.0

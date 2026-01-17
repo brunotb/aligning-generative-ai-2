@@ -20,6 +20,7 @@ from typing import Any
 
 from google.genai import types
 
+from ..api.events import FormEvent, event_emitter
 from ..app.state import FormState
 from ..app.validation import validate_field
 from ..config import LOGGER
@@ -64,6 +65,10 @@ async def handle_tool_calls(
     """
     if not tool_call.function_calls:
         return
+    
+    # Get current session ID from voice runner (lazy import to avoid circular dependency)
+    from ..api.voice_runner import voice_runner
+    session_id = voice_runner.get_current_session_id() or "default"
 
     responses: list[types.FunctionResponse] = []
 
@@ -83,6 +88,22 @@ async def handle_tool_calls(
                     )
                 )
             else:
+                # Emit field changed event
+                event_emitter.emit_sync(
+                    FormEvent(
+                        type="field_changed",
+                        data={
+                            "field_id": field.field_id,
+                            "label": field.label,
+                            "description": field.description,
+                            "examples": field.examples,
+                            "current_index": form_state.current_index,
+                            "progress_percent": form_state.progress_percent(),
+                        },
+                        session_id=session_id,
+                    )
+                )
+                
                 responses.append(
                     types.FunctionResponse(
                         id=func_call.id,
@@ -109,11 +130,70 @@ async def handle_tool_calls(
                 is_valid, message = validate_field(field, value)
                 if not is_valid:
                     form_state.set_error(field.field_id, message)
+                
+                # Emit validation result event
+                event_emitter.emit_sync(
+                    FormEvent(
+                        type="validation_result",
+                        data={
+                            "field_id": field.field_id,
+                            "value": value,
+                            "is_valid": is_valid,
+                            "message": message,
+                        },
+                        session_id=session_id,
+                    )
+                )
+                
                 responses.append(
                     types.FunctionResponse(
                         id=func_call.id,
                         name=name,
                         response={"is_valid": is_valid, "message": message},
+                    )
+                )
+
+        elif name == "navigate_to_field":
+            field_id = args.get("field_id", "")
+            field = form_state.navigate_to_field(field_id)
+            
+            if not field:
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "message": f"Field '{field_id}' not found.",
+                        },
+                    )
+                )
+            else:
+                # Emit field changed event for the navigated field
+                event_emitter.emit_sync(
+                    FormEvent(
+                        type="field_changed",
+                        data={
+                            "field_id": field.field_id,
+                            "label": field.label,
+                            "description": field.description,
+                            "examples": field.examples,
+                            "current_index": form_state.current_index,
+                            "progress_percent": form_state.progress_percent(),
+                        },
+                        session_id=session_id,
+                    )
+                )
+                
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": True,
+                            "field": _field_to_payload(field),
+                            "current_value": form_state.answers.get(field_id, ""),
+                        },
                     )
                 )
 
@@ -133,7 +213,22 @@ async def handle_tool_calls(
                 )
             else:
                 form_state.record_value(field.field_id, value)
+                progress_before = form_state.progress_percent()
                 form_state.advance()
+                
+                # Emit field saved event
+                event_emitter.emit_sync(
+                    FormEvent(
+                        type="field_saved",
+                        data={
+                            "field_id": field.field_id,
+                            "value": value,
+                            "progress_percent": form_state.progress_percent(),
+                        },
+                        session_id=session_id,
+                    )
+                )
+                
                 responses.append(
                     types.FunctionResponse(
                         id=func_call.id,
@@ -161,6 +256,18 @@ async def handle_tool_calls(
                     f.write(pdf_bytes)
 
                 LOGGER.info("PDF generated and saved to %s", output_path)
+                
+                # Emit form complete and PDF generated events
+                event_emitter.emit_sync(
+                    FormEvent(
+                        type="form_complete",
+                        data={
+                            "pdf_location": output_path,
+                            "pdf_size_bytes": len(pdf_bytes),
+                        },
+                        session_id=session_id,
+                    )
+                )
 
                 responses.append(
                     types.FunctionResponse(

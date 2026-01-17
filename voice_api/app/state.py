@@ -60,6 +60,24 @@ class FormState:
         """
         self.current_index += 1
         return self.current_field()
+    
+    def navigate_to_field(self, field_id: str) -> Optional[AnmeldungField]:
+        """
+        Navigate to a specific field by its field_id.
+        
+        Allows going back to previous fields for corrections or jumping to any field.
+        
+        Args:
+            field_id: The unique identifier of the field to navigate to
+            
+        Returns:
+            The AnmeldungField if found, or None if field_id doesn't exist
+        """
+        for idx, field in enumerate(self.fields):
+            if field.field_id == field_id:
+                self.current_index = idx
+                return field
+        return None
 
     def is_complete(self) -> bool:
         """

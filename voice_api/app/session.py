@@ -161,6 +161,11 @@ async def receive_from_model(
     """
     # Import here to avoid circular dependency between app and llm modules
     from ..llm import handle_tool_calls
+    from ..api.events import FormEvent, event_emitter
+    from ..api.voice_runner import voice_runner
+    
+    # Get current session ID
+    session_id = voice_runner.get_current_session_id() or "default"
     
     response_count = 0
     while not stop_event.is_set():
@@ -206,15 +211,39 @@ async def receive_from_model(
                     server_content.input_transcription
                     and server_content.input_transcription.text
                 ):
-                    LOGGER.info("User said: %s", server_content.input_transcription.text)
+                    user_text = server_content.input_transcription.text
+                    LOGGER.info("User said: %s", user_text)
+                    
+                    # Emit transcript event
+                    event_emitter.emit_sync(
+                        FormEvent(
+                            type="transcript",
+                            data={
+                                "speaker": "user",
+                                "text": user_text,
+                            },
+                            session_id=session_id,
+                        )
+                    )
 
                 # Log output transcription (what model said)
                 if (
                     server_content.output_transcription
                     and server_content.output_transcription.text
                 ):
-                    LOGGER.info(
-                        "Model (voice): %s", server_content.output_transcription.text
+                    model_text = server_content.output_transcription.text
+                    LOGGER.info("Model (voice): %s", model_text)
+                    
+                    # Emit transcript event
+                    event_emitter.emit_sync(
+                        FormEvent(
+                            type="transcript",
+                            data={
+                                "speaker": "assistant",
+                                "text": model_text,
+                            },
+                            session_id=session_id,
+                        )
                     )
 
         except Exception as exc:  # noqa: BLE001

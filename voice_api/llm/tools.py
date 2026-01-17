@@ -94,6 +94,23 @@ def build_function_declarations() -> List[types.FunctionDeclaration]:
             ),
         ),
         types.FunctionDeclaration(
+            name="navigate_to_field",
+            description=(
+                "Navigate to a specific field by field_id. Use this when the user wants to "
+                "correct or review a previously entered field. Returns the field metadata."
+            ),
+            parameters=types.Schema(
+                type=types.Type.OBJECT,
+                properties={
+                    "field_id": types.Schema(
+                        type=types.Type.STRING,
+                        description="The field_id to navigate to (e.g., 'first_name', 'birth_date')",
+                    ),
+                },
+                required=["field_id"],
+            ),
+        ),
+        types.FunctionDeclaration(
             name="generate_anmeldung_pdf",
             description=(
                 "Generate the filled Anmeldung PDF from all collected form data. "
