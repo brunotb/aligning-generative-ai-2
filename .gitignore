@@ -10,4 +10,3 @@ frontend/dist
 coverage
 backend/filled_forms
 backend/__pycache__
-playground

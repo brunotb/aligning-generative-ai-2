@@ -1,0 +1,304 @@
+# ==============================================================================
+# MUNICH RESIDENCE REGISTRATION (MELDESCHEIN) - CONVERSATION FLOW
+# Version: 1.0 (Hackathon Edition)
+# Personas Supported: Mateo (English), Thomas (Simple German), Renate (Voice)
+# ==============================================================================
+
+meta:
+  version: "1.0"
+  pdf_template: "Anmeldung_Meldeschein_20220622.pdf"
+
+# ------------------------------------------------------------------------------
+# SECTION 1: THE MOVE (Dates & Addresses)
+# ------------------------------------------------------------------------------
+start:
+  next: step_move_date
+
+step_move_date:
+  id: "step_move_date"
+  target_field: "einzug"
+  type: "date"
+  validation:
+    pattern: "^\\d{2}\\.\\d{2}\\.\\d{2}$" # DD.MM.YY
+    error_msg: 
+      en: "Please say the date in this format: Day, Month, Year. For example: 15.01.25."
+      de: "Bitte sag das Datum so: Tag, Monat, Jahr. Zum Beispiel: 15.01.25."
+  bot_says:
+    en: "Hello! Let's get you registered. First, what date did you actually move into your new apartment?"
+    de: "Hallo! Lass uns deine Anmeldung machen. An welchem Datum bist du in die neue Wohnung eingezogen?"
+  next: step_new_zip
+
+step_new_zip:
+  id: "step_new_zip"
+  target_field: "nw.plz"
+  type: "regex"
+  validation:
+    pattern: "^8\\d{4}$" # Munich Zips start with 8
+    error_msg: 
+      en: "That doesn't sound like a Munich zip code. It should start with 8 and have 5 digits."
+      de: "Das klingt nicht nach einer Münchner Postleitzahl. Sie muss mit 8 anfangen."
+  bot_says:
+    en: "What is the Zip Code (Postleitzahl) of your new apartment?"
+    de: "Wie ist die Postleitzahl von der neuen Wohnung?"
+  next: step_new_street
+
+step_new_street:
+  id: "step_new_street"
+  target_field: "neuw.strasse"
+  type: "text"
+  bot_says:
+    en: "And what is the Street and House Number?"
+    de: "Und wie heißt die Straße und die Hausnummer?"
+  next: step_residence_type
+
+step_residence_type:
+  id: "step_residence_type"
+  target_field: "wohnung"
+  type: "choice"
+  # Logic: Map user intent to the Integer value expected by the PDF (1=Main, 2=Secondary)
+  # See PDF Schema: "wohnung": {maximum: 2, type: integer}
+  options:
+    main: 1
+    only: 1
+    hauptwohnung: 1
+    alleinige: 1
+    secondary: 2
+    nebenwohnung: 2
+  bot_says:
+    en: "Is this the only place you live in Germany, or do you have another apartment?"
+    de: "Wohnst du nur hier, oder hast du noch eine andere Wohnung in Deutschland?"
+  # Simple Language Explanation
+  context_help: 
+    en: "If you keep another apartment in Berlin or Hamburg, say 'Secondary'. If you only live here, say 'Main'."
+    de: "Wenn du noch eine Wohnung woanders hast, sag 'Nebenwohnung'. Wenn du nur hier wohnst, sag 'Hauptwohnung'."
+  next: step_origin_check
+
+# ------------------------------------------------------------------------------
+# SECTION 2: PREVIOUS ADDRESS (Branching Logic)
+# ------------------------------------------------------------------------------
+step_origin_check:
+  id: "step_origin_check"
+  target_field: "TEMP_ORIGIN" # Intermediate variable, not in PDF
+  type: "branch"
+  bot_says:
+    en: "Where did you live before moving here? Was it in Germany or another country?"
+    de: "Wo hast du vorher gewohnt? War das in Deutschland oder im Ausland?"
+  branches:
+    germany: step_prev_address_de
+    deutschland: step_prev_address_de
+    abroad: step_prev_address_int
+    ausland: step_prev_address_int
+
+step_prev_address_de:
+  id: "step_prev_address_de"
+  target_field: "bishwo.ort" # Previous City
+  # We assume simple demo: Just City. In real app, we'd ask Street/PLZ too.
+  bot_says:
+    en: "Which city in Germany did you move from?"
+    de: "Aus welcher Stadt in Deutschland bist du hergezogen?"
+  next: step_p1_name
+
+step_prev_address_int:
+  id: "step_prev_address_int"
+  target_field: "zuzug" # PDF Field: Last address in Germany (if returning) or Country
+  bot_says:
+    en: "Welcome! Which country did you move from?"
+    de: "Willkommen! Aus welchem Land kommst du?"
+  next: step_p1_name
+
+# ------------------------------------------------------------------------------
+# SECTION 3: APPLICANT DETAILS (Person 1)
+# ------------------------------------------------------------------------------
+step_p1_name:
+  id: "step_p1_name"
+  target_field: "fam1" # Split logic handled by AI (Extract Family Name)
+  type: "composite" # AI extracts both First and Last name here
+  fields: 
+    - fam1
+    - vorn1
+  bot_says:
+    en: "Okay, now about you. What is your full name (First and Last Name)?"
+    de: "Jetzt zu dir. Wie ist dein voller Name (Vorname und Nachname)?"
+  next: step_p1_birth
+
+step_p1_birth:
+  id: "step_p1_birth"
+  target_field: "gebdat1"
+  type: "date"
+  validation:
+    pattern: "^\\d{2}\\.\\d{2}\\.\\d{4}$"
+  bot_says:
+    en: "When is your birthday?"
+    de: "Wann hast du Geburtstag?"
+  next: step_p1_gender
+
+step_p1_gender:
+  id: "step_p1_gender"
+  target_field: "geschl1"
+  type: "choice"
+  # Mapping based on PDF Schema Integers or text mapping
+  options:
+    male: 1      # M
+    männlich: 1
+    female: 2    # W
+    weiblich: 2
+    diverse: 4   # D
+    divers: 4
+  bot_says:
+    en: "What gender is listed in your passport?"
+    de: "Welches Geschlecht steht in deinem Pass?"
+  next: step_p1_religion
+
+step_p1_religion:
+  id: "step_p1_religion"
+  target_field: "rel1"
+  type: "choice"
+  # Codes from Docling Extraction (Page 4 of PDF)
+  options:
+    catholic: "rk"
+    katholisch: "rk"
+    protestant: "ev"
+    evangelisch: "ev"
+    jewish: "isby"
+    jüdisch: "isby"
+    none: "oa"
+    keine: "oa"
+    atheist: "oa"
+  bot_says:
+    en: "Are you a registered member of a religious community in Germany? (Catholic, Protestant, Jewish). If not, say 'None'."
+    de: "Bist du in der Kirche? (Katholisch, Evangelisch, Jüdisch). Wenn nicht, sag 'Keine'."
+  next: step_p1_status
+
+# ------------------------------------------------------------------------------
+# SECTION 4: MARITAL STATUS & SPOUSE (Complex Branching)
+# ------------------------------------------------------------------------------
+step_p1_status:
+  id: "step_p1_status"
+  target_field: "famst1"
+  type: "choice"
+  # Codes from Docling Extraction
+  options:
+    single: "LD"
+    ledig: "LD"
+    married: "VH"
+    verheiratet: "VH"
+    divorced: "GS"
+    geschieden: "GS"
+    widowed: "VW"
+    verwitwet: "VW"
+    registered partnership: "LP"
+    lebenspartnerschaft: "LP"
+  bot_says:
+    en: "What is your family status? Are you Single, Married, or Divorced?"
+    de: "Bist du Ledig, Verheiratet oder Geschieden?"
+  branches:
+    "VH": step_spouse_moving_check  # Married -> Check Spouse
+    "LP": step_spouse_moving_check  # Partnership -> Check Spouse
+    "LD": step_passport             # Single -> Skip to Passport
+    "GS": step_passport             # Divorced -> Skip to Passport
+    "VW": step_passport             # Widowed -> Skip to Passport
+
+step_spouse_moving_check:
+  id: "step_spouse_moving_check"
+  target_field: "TEMP_SPOUSE_MOVING"
+  type: "branch"
+  bot_says:
+    en: "Is your spouse or partner moving into this apartment with you?"
+    de: "Zieht dein Partner auch mit in die Wohnung ein?"
+  branches:
+    yes: step_p2_name      # Moving together -> Fill Person 2 Columns
+    ja: step_p2_name
+    no: step_separation    # Not moving -> Fill "Getrennt lebend" box
+    nein: step_separation
+
+# --- Path A: Spouse IS moving (Fill Person 2 Fields) ---
+step_p2_name:
+  id: "step_p2_name"
+  type: "composite"
+  fields: [fam2, vorn2]
+  bot_says:
+    en: "Great. What is your spouse's First and Last Name?"
+    de: "Gut. Wie heißt dein Partner mit Vornamen und Nachnamen?"
+  next: step_p2_birth
+
+step_p2_birth:
+  id: "step_p2_birth"
+  target_field: "gebdat2"
+  bot_says:
+    en: "When is your spouse's birthday?"
+    de: "Wann hat dein Partner Geburtstag?"
+  next: step_p2_religion
+
+step_p2_religion:
+  id: "step_p2_religion"
+  target_field: "rel2"
+  type: "choice"
+  options: {catholic: "rk", protestant: "ev", none: "oa"}
+  bot_says:
+    en: "What is your spouse's religion?"
+    de: "Welche Religion hat dein Partner?"
+  next: step_passport_intro
+
+# --- Path B: Spouse NOT moving (Check Separation) ---
+step_separation:
+  id: "step_separation"
+  target_field: "getrennt1"
+  type: "boolean"
+  bot_says:
+    en: "Are you permanently separated from your spouse? (Yes/No)"
+    de: "Lebst du dauerhaft getrennt von deinem Partner? (Ja/Nein)"
+  next: step_spouse_address_abroad
+
+step_spouse_address_abroad:
+  id: "step_spouse_address_abroad"
+  target_field: "anschr5a" # Field for non-moving spouse address
+  bot_says:
+    en: "Where does your spouse currently live? (City/Country)"
+    de: "Wo wohnt dein Partner jetzt gerade? (Stadt/Land)"
+  next: step_passport_intro
+
+# ------------------------------------------------------------------------------
+# SECTION 5: DOCUMENTS & FINISH
+# ------------------------------------------------------------------------------
+step_passport_intro:
+  id: "step_passport_intro"
+  bot_says:
+    en: "Almost done! I just need your passport details now."
+    de: "Fast fertig! Ich brauche jetzt noch deine Pass-Daten."
+  next: step_passport_type
+
+step_passport_type:
+  id: "step_passport_type"
+  target_field: "art1"
+  type: "choice"
+  # Codes from Docling Extraction
+  options:
+    passport: "RP" # Reisepass
+    reisepass: "RP"
+    id card: "PA" # Personalausweis
+    personalausweis: "PA"
+  bot_says:
+    en: "Do you have a Passport or an ID Card?"
+    de: "Hast du einen Reisepass oder einen Personalausweis?"
+  next: step_passport_number
+
+step_passport_number:
+  id: "step_passport_number"
+  target_field: "serien1"
+  type: "regex"
+  validation:
+    pattern: "^[A-Z0-9]+$"
+    error_msg: 
+      en: "Passport numbers usually contain only letters and numbers."
+      de: "Passnummern haben normalerweise nur Buchstaben und Zahlen."
+  bot_says:
+    en: "Please read the Document Number (top right corner usually)."
+    de: "Bitte lies mir die Nummer vor (meistens oben rechts)."
+  next: finish
+
+finish:
+  id: "finish"
+  action: "generate_pdf"
+  bot_says:
+    en: "Success! I have generated your Meldeschein. Please sign the box at the bottom."
+    de: "Geschafft! Ich habe deinen Meldeschein erstellt. Bitte unterschreibe unten im Kasten."
