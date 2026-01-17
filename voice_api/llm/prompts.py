@@ -124,7 +124,7 @@ get_next_form_field():
 
 validate_form_field(value: str):
   - IMPORTANT: Parse and convert user input to the expected format BEFORE calling this tool
-  - For dates: Convert "1. Oktober 1999" or "October 1, 1999" to "011099" (DDMMYY format)
+  - For dates: Convert "1. Oktober 1999" or "October 1, 1999" to "01101999" (DDMMYYYY format)
   - For postal codes: Extract just the digits, remove spaces or hyphens
   - For choices: Convert user's spoken option to the numeric index (0, 1, 2, etc.)
   - Pass only the properly formatted value, NOT the user's raw input

@@ -35,33 +35,33 @@ class TestValidateDateDe:
     """Tests for _validate_date_de validator."""
 
     def test_valid_full_year(self):
-        """Valid date with full year should pass."""
-        is_valid, msg = validators._validate_date_de("15.01.1990")
+        """Valid date in DDMMYYYY format should pass."""
+        is_valid, msg = validators._validate_date_de("15011990")
         assert is_valid is True
 
     def test_valid_two_digit_year_20xx(self):
-        """Two-digit year <= 30 should become 20xx."""
-        is_valid, msg = validators._validate_date_de("15.01.25")
+        """Two-digit year should be full 4-digit year."""
+        is_valid, msg = validators._validate_date_de("15012025")
         assert is_valid is True
 
     def test_valid_two_digit_year_19xx(self):
-        """Two-digit year > 30 should become 19xx."""
-        is_valid, msg = validators._validate_date_de("15.01.85")
+        """Year in 1900s format."""
+        is_valid, msg = validators._validate_date_de("15011985")
         assert is_valid is True
 
     def test_invalid_format_no_dots(self):
-        """Date without dots should fail."""
-        is_valid, msg = validators._validate_date_de("15011990")
+        """Date with dots should fail (requires DDMMYYYY format)."""
+        is_valid, msg = validators._validate_date_de("15.01.1990")
         assert is_valid is False
 
     def test_invalid_day(self):
         """Invalid day (32) should fail."""
-        is_valid, msg = validators._validate_date_de("32.01.1990")
+        is_valid, msg = validators._validate_date_de("32011990")
         assert is_valid is False
 
     def test_invalid_month(self):
         """Invalid month (13) should fail."""
-        is_valid, msg = validators._validate_date_de("15.13.1990")
+        is_valid, msg = validators._validate_date_de("15131990")
         assert is_valid is False
 
     def test_empty_date(self):
@@ -161,7 +161,7 @@ class TestValidateByType:
 
     def test_dispatch_date_de(self):
         """Dispatch to German date validator."""
-        is_valid, msg = validators.validate_by_type("date_de", "15.01.1990")
+        is_valid, msg = validators.validate_by_type("date_de", "15011990")
         assert is_valid is True
 
     def test_dispatch_postal_code_de(self):

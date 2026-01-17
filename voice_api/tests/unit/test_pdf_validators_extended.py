@@ -55,74 +55,73 @@ class TestValidateDateDEEdgeCases:
 
     def test_validate_date_leap_year(self):
         """Valid leap year date should pass."""
-        result, message = _validate_date_de("29.02.2020")
+        result, message = _validate_date_de("29022020")
         assert result
 
     def test_validate_date_non_leap_year_feb_29(self):
         """Feb 29 in non-leap year should fail."""
-        result, message = _validate_date_de("29.02.2021")
+        result, message = _validate_date_de("29022021")
         assert not result
 
     def test_validate_date_year_99_treated_as_1999(self):
-        """Year 99 should be treated as 1999."""
-        result, message = _validate_date_de("01.01.99")
+        """Year must be full 4 digits."""
+        result, message = _validate_date_de("01011999")
         assert result
 
     def test_validate_date_year_00_treated_as_2000(self):
-        """Year 00 should be treated as 2000."""
-        result, message = _validate_date_de("01.01.00")
+        """Year 2000 valid."""
+        result, message = _validate_date_de("01012000")
         assert result
 
     def test_validate_date_year_30_treated_as_1930(self):
-        """Year 30 should be treated as 1930 (>30 → 19xx)."""
-        result, message = _validate_date_de("01.01.30")
+        """Year 1930 valid."""
+        result, message = _validate_date_de("01011930")
         assert result
 
     def test_validate_date_year_31_treated_as_2031(self):
-        """Year 31 should be treated as 2031 (≤30 → 20xx would be wrong, >30 → 19xx)."""
-        result, message = _validate_date_de("01.01.31")
-        # This depends on implementation
-        assert result is not None  # Just check it doesn't crash
+        """Year 2031 valid."""
+        result, message = _validate_date_de("01012031")
+        assert result
 
     def test_validate_date_invalid_day_32(self):
         """Day 32 should be invalid."""
-        result, message = _validate_date_de("32.01.1990")
+        result, message = _validate_date_de("32011990")
         assert not result
 
     def test_validate_date_invalid_month_13(self):
         """Month 13 should be invalid."""
-        result, message = _validate_date_de("01.13.1990")
+        result, message = _validate_date_de("01131990")
         assert not result
 
     def test_validate_date_invalid_format_with_slashes(self):
-        """Slashes instead of dots should be invalid."""
+        """Slashes should be invalid (requires DDMMYYYY format)."""
         result, message = _validate_date_de("01/01/1990")
         assert not result
 
     def test_validate_date_invalid_format_no_separators(self):
-        """No separators should be invalid."""
-        result, message = _validate_date_de("01011990")
+        """Wrong length should be invalid (must be exactly 8 digits)."""
+        result, message = _validate_date_de("01011990extra")
         assert not result
 
     def test_validate_date_padding_not_required(self):
-        """Dates without zero-padding might work depending on implementation."""
+        """Dates must have exactly 8 digits (zero-padded)."""
         result, message = _validate_date_de("1.1.1990")
-        # Just check it doesn't crash
-        assert result is not None
+        # Should fail - needs 8 digits
+        assert not result
 
     def test_validate_date_december_31st(self):
         """Dec 31 should be valid."""
-        result, message = _validate_date_de("31.12.1990")
+        result, message = _validate_date_de("31121990")
         assert result
 
     def test_validate_date_january_1st(self):
         """Jan 1 should be valid."""
-        result, message = _validate_date_de("01.01.1990")
+        result, message = _validate_date_de("01011990")
         assert result
 
     def test_validate_date_april_31_invalid(self):
         """April 31 doesn't exist."""
-        result, message = _validate_date_de("31.04.1990")
+        result, message = _validate_date_de("31041990")
         assert not result
 
 
@@ -250,12 +249,12 @@ class TestValidateByType:
 
     def test_validate_by_type_date_de_valid(self):
         """Dispatcher should route to date validator."""
-        result, message = validate_by_type("date_de", "01.01.1990")
+        result, message = validate_by_type("date_de", "01011990")
         assert result
 
     def test_validate_by_type_date_de_invalid(self):
         """Dispatcher should reject invalid date."""
-        result, message = validate_by_type("date_de", "99.99.1990")
+        result, message = validate_by_type("date_de", "99991990")
         assert not result
 
     def test_validate_by_type_integer_choice(self):

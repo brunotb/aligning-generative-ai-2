@@ -4,7 +4,7 @@ Field value validators for Anmeldung form.
 This module provides validation for form field values according to German registration
 form (Anmeldung) requirements. It supports:
 - Text fields (non-empty)
-- German date format (DD.MM.YYYY or DD.MM.YY)
+- German date format (DDMMYYYY - 8 digits, no separators)
 - German postal codes (4-5 digits)
 - Integer choice fields (for radio buttons, dropdowns)
 
@@ -56,40 +56,38 @@ def _validate_text(value: str) -> ValidationResult:
 
 def _validate_date_de(value: str) -> ValidationResult:
     """
-    Validate German date format DD.MM.YYYY or DD.MM.YY.
+    Validate German date format DDMMYYYY (8 digits, no separators).
 
-    Handles 2-digit years: year <= 30 becomes 20xx, year > 30 becomes 19xx.
-    Also validates that the date is actually valid (e.g., 31.02 is rejected).
+    Takes full 4-digit year.
+    Also validates that the date is actually valid (e.g., 3102 is rejected).
 
     Args:
-        value: Date string to validate
+        value: Date string to validate (8 digits: DDMMYYYY)
 
     Returns:
         (True, "") if valid, (False, error_msg) otherwise
 
     Examples:
-        >>> _validate_date_de("15.01.1990")
+        >>> _validate_date_de("15011990")
         (True, "")
-        >>> _validate_date_de("15.01.25")
+        >>> _validate_date_de("15012025")
         (True, "")
-        >>> _validate_date_de("32.01.1990")
+        >>> _validate_date_de("32121990")
         (False, "Invalid date...")
     """
     if not value or not value.strip():
         return False, "Date cannot be empty."
 
-    # Check format: DD.MM.YYYY or DD.MM.YY
-    pattern = r"^\d{2}\.\d{2}\.\d{2}(?:\d{2})?$"
+    # Check format: exactly 8 digits (DDMMYYYY)
+    pattern = r"^\d{8}$"
     if not re.match(pattern, value.strip()):
-        return False, "Invalid format. Use DD.MM.YYYY (e.g., 15.01.1990)."
+        return False, "Invalid format. Use DDMMYYYY (e.g., 15011990 for January 15, 1990)."
 
     try:
-        parts = value.strip().split(".")
-        day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
-
-        # Handle 2-digit year: <= 30 becomes 20xx, > 30 becomes 19xx
-        if year < 100:
-            year += 2000 if year <= 30 else 1900
+        value_str = value.strip()
+        day = int(value_str[0:2])
+        month = int(value_str[2:4])
+        year = int(value_str[4:8])
 
         # Validate that the date is actually valid
         datetime(year, month, day)

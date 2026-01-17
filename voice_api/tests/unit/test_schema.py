@@ -8,7 +8,7 @@ class TestAnmeldungFields:
 
     def test_all_fields_defined(self):
         """All required fields should be defined."""
-        assert len(ANMELDUNG_FORM_FIELDS) == 13
+        assert len(ANMELDUNG_FORM_FIELDS) == 11
 
     def test_field_by_id_lookup(self):
         """Fields should be accessible by field_id."""

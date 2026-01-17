@@ -21,11 +21,11 @@ class TestValidationWorkflow:
         assert is_valid is False
 
     def test_validate_date_field(self):
-        """Date fields should validate in DD.MM.YYYY format."""
+        """Date fields should validate in DDMMYYYY format."""
         birth_date_field = FIELD_BY_ID["birth_date_p1"]
         
         # Valid
-        is_valid, msg = validate_field(birth_date_field, "15.01.1990")
+        is_valid, msg = validate_field(birth_date_field, "15011990")
         assert is_valid is True
         
         # Invalid format
@@ -159,16 +159,16 @@ class TestPdfFormatTransformation:
         assert pdf_data["wohnung"] == 2
 
     def test_transform_date_fields(self):
-        """Date fields should pass through in DD.MM.YYYY format."""
+        """Date fields should pass through in DDMMYY format."""
         answers = {
-            "birth_date_p1": "15.01.1990",
-            "move_in_date": "01.02.2025"
+            "birth_date_p1": "15011990",
+            "move_in_date": "01022025"
         }
         
         pdf_data = transform_answers_to_pdf_format(answers)
         
-        assert pdf_data["gebdat1"] == "15.01.1990"
-        assert pdf_data["einzug"] == "01.02.2025"
+        assert pdf_data["gebdat1"] == "15011990"
+        assert pdf_data["einzug"] == "01022025"
 
     def test_transform_unknown_field_skipped(self):
         """Unknown fields should be silently skipped."""
@@ -187,13 +187,11 @@ class TestPdfFormatTransformation:
         answers = {
             "family_name_p1": "Mueller",
             "first_name_p1": "Max",
-            "birth_date_p1": "15.01.1990",
+            "birth_date_p1": "15011990",
             "birth_place_p1": "Berlin",
             "gender_p1": "0",
             "family_status_p1": "0",
-            "nationality_p1": "German",
-            "religion_p1": "8",
-            "move_in_date": "01.02.2025",
+            "move_in_date": "01022025",
             "new_street_address": "Leopoldstraße 25a",
             "new_postal_code": "80802",
             "new_city": "München",
@@ -205,13 +203,11 @@ class TestPdfFormatTransformation:
         # Check all PDF field IDs are present
         assert pdf_data["fam1"] == "Mueller"
         assert pdf_data["vorn1"] == "Max"
-        assert pdf_data["gebdat1"] == "15.01.1990"
+        assert pdf_data["gebdat1"] == "15011990"
         assert pdf_data["gebort1"] == "Berlin"
         assert pdf_data["geschl1"] == 0
         assert pdf_data["famst1"] == 0
-        assert pdf_data["staatsang1"] == "German"
-        assert pdf_data["rel1"] == 8
-        assert pdf_data["einzug"] == "01.02.2025"
+        assert pdf_data["einzug"] == "01022025"
         assert pdf_data["neuw.strasse"] == "Leopoldstraße 25a"
         assert pdf_data["nw.plz"] == "80802"
         assert pdf_data["nw.ort"] == "München"
