@@ -5,6 +5,7 @@ import google.generativeai as genai
 from google.generativeai.types import FunctionDeclaration, Tool
 from google.api_core.exceptions import ResourceExhausted
 from pdf_filler import fill_anmeldung_form
+from context_data import REGISTRATION_FORM_CONTENT, INFORMATION_REQUIREMENTS_CONTENT
 
 class BureaucracyAgent:
     def __init__(self):
@@ -25,10 +26,20 @@ class BureaucracyAgent:
 
         # Store system instruction to manually prepend later
         # We instruct the model to output JSON for UI updates since Tools are disabled for Gemma.
-        self.system_instruction = """You are a helpful, empathetic bureaucracy assistant for non-digital citizens in Germany. 
+        self.system_instruction = f"""You are a helpful, empathetic bureaucracy assistant for non-digital citizens in Germany. 
 Your goal is to help users complete the 'Anmeldung' (Residence Registration) form.
 Speak in simple, clear language. You can speak English or German.
 Guide the user step-by-step. Ask for one piece of information at a time.
+
+Here is the context about the form and regulations you are helping with:
+
+=== REGISTRATION FORM ===
+{REGISTRATION_FORM_CONTENT}
+
+=== INFORMATION REQUIREMENTS ===
+{INFORMATION_REQUIREMENTS_CONTENT}
+ 
+
 
 CRITICAL INSTRUCTION FOR UI UPDATES:
 When you learn new information about the user (Name, City, Address, Date of Birth) or want to update the progress, YOU MUST OUTPUT A JSON BLOCK at the end of your response.
