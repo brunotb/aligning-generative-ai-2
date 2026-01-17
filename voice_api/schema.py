@@ -31,7 +31,7 @@ FORM_FIELDS: List[FormField] = [
     FormField(
         field_id="date_of_move",
         label="Date of move",
-        description="Date you moved into the residence (YYYY-MM-DD)",
+        description="Date you moved into the residence. Adjust format to fit the constraints if needed.",
         field_type="date",
         constraints={"format": "YYYY-MM-DD"},
     ),

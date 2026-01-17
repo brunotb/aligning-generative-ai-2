@@ -12,21 +12,24 @@ from dataclasses import dataclass
 LOG_LEVEL = os.getenv("APP_LOG_LEVEL", "INFO").upper()
 logging.basicConfig(
     level=LOG_LEVEL,
-    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    format="[%(levelname)s] %(name)s - %(message)s",
+    # format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
 )
 LOGGER = logging.getLogger("voice_api")
 
 # ---------------------------------------------------------------------------
 # Model and prompt configuration
 # ---------------------------------------------------------------------------
-MODEL_NAME = os.getenv("APP_MODEL_NAME", "gemini-2.5-flash-native-audio-latest")
+MODEL_NAME = os.getenv("APP_MODEL_NAME", "gemini-2.5-flash-native-audio-preview-09-2025")
 
 SYSTEM_PROMPT_BASE = (
     "You are a helpful assistant guiding a user through completing a form.\n"
     "Always follow this loop: welcome -> get_next_form_field -> explain field -> "
     "collect user reply -> validate_form_field -> if invalid, explain and ask again; "
-    "if valid, save_form_field -> get_next_form_field -> repeat until done.\n"
+    "if valid, save_form_field and give validation to user-> get_next_form_field -> repeat until done.\n"
     "Speak concisely, one question at a time. Reflect validation errors back with a short reason."
+    "Use the tools provided to get and save form fields. And ensure a good user experience.\n"
+    "Welcome the user directly without waiting for them to say hello first.\n"
 )
 
 # ---------------------------------------------------------------------------

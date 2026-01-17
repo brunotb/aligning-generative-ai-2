@@ -158,6 +158,10 @@ async def handle_tool_calls(tool_call: types.ToolCall, session: Any, form_state:
             )
 
     if responses:
+        log_payload = [
+            {"id": r.id, "name": r.name, "response": r.response} for r in responses
+        ]
+        LOGGER.info("Tool responses: %s", json.dumps(log_payload))
         await session.send_tool_response(function_responses=responses)
         LOGGER.debug("Sent %s tool responses", len(responses))
 

@@ -116,7 +116,7 @@ async def receive_from_model(
 
                 if server_content.model_turn:
                     parts = server_content.model_turn.parts or []
-                    LOGGER.info("Model turn with %s part(s)", len(parts))
+                    LOGGER.debug("Model turn with %s part(s)", len(parts))
                     for part in parts:
                         if part.thought:
                             LOGGER.debug("Model thought: %s", part.thought)
