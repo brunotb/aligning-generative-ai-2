@@ -1,66 +1,85 @@
-"""Form schema definitions and catalog."""
+"""Form schema definitions for Anmeldung voice form.
+
+This module provides FormField definitions by wrapping the authoritative field
+definitions from anmeldung_fields.py. The actual field metadata (labels, descriptions,
+validators, enums, examples) is defined in anmeldung_fields.py and should be updated
+there.
+"""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
+
+from .anmeldung_fields import ANMELDUNG_FORM_FIELDS, AnmeldungField
 
 
 @dataclass(frozen=True)
 class FormField:
-    """Definition of a form field exposed to the model."""
+    """
+    Definition of a form field exposed to the model.
+
+    This wraps AnmeldungField to provide a consistent interface to the rest of voice_api.
+    All field metadata is derived from anmeldung_fields.py.
+
+    Attributes:
+        field_id: Unique voice-friendly field identifier
+        label: Short human-readable label
+        description: Detailed description from Anmeldung form
+        field_type: Validator type (text, date_de, integer_choice, postal_code_de)
+        required: Whether field is mandatory
+        examples: Example valid inputs
+        constraints: Additional constraints (for compatibility)
+        pdf_field_id: Corresponding PDF field name
+        validator_type: Type of validator (same as field_type)
+        validator_config: Configuration dict for validator
+        enum_values: Optional mapping of indices to display strings (for choice fields)
+    """
 
     field_id: str
     label: str
     description: str
-    field_type: str  # e.g., text, date, postal_code
+    field_type: str
     required: bool = True
     examples: Optional[List[str]] = None
-    constraints: Optional[Dict[str, str]] = None  # regex, min/max, etc.
+    constraints: Optional[Dict[str, str]] = None
+    pdf_field_id: Optional[str] = None
+    validator_type: Optional[str] = None
+    validator_config: Optional[Dict[str, Any]] = None
+    enum_values: Optional[Dict[int, str]] = None
 
 
-# Initial catalog: extend to ~30 fields as needed
+def _anmeldung_to_form_field(afield: AnmeldungField) -> FormField:
+    """
+    Convert an AnmeldungField to a FormField.
+
+    Args:
+        afield: AnmeldungField from anmeldung_fields.py
+
+    Returns:
+        FormField ready for use in voice_api
+    """
+    return FormField(
+        field_id=afield.field_id,
+        label=afield.label,
+        description=afield.description,
+        field_type=afield.validator.type,
+        required=afield.required,
+        examples=afield.examples,
+        pdf_field_id=afield.pdf_field_id,
+        validator_type=afield.validator.type,
+        validator_config=afield.validator.config,
+        enum_values=afield.enum_values,
+    )
+
+
+# Build the form fields from Anmeldung definitions
 FORM_FIELDS: List[FormField] = [
-    FormField(
-        field_id="name",
-        label="Full name",
-        description="Your full legal name as on your ID",
-        field_type="text",
-        examples=["Jane Doe", "Max Mustermann"],
-    ),
-    FormField(
-        field_id="date_of_move",
-        label="Date of move",
-        description="Date you moved into the residence. Adjust format to fit the constraints if needed.",
-        field_type="date",
-        constraints={"format": "YYYY-MM-DD"},
-    ),
-    FormField(
-        field_id="street",
-        label="Street",
-        description="Street and house number",
-        field_type="text",
-        examples=["Main Street 12", "Sonnenallee 5"],
-    ),
-    FormField(
-        field_id="postal_code",
-        label="Postal code",
-        description="Five-digit German postal code",
-        field_type="postal_code",
-        constraints={"regex": "^\\d{5}$"},
-    ),
-    FormField(
-        field_id="city",
-        label="City",
-        description="City or municipality",
-        field_type="text",
-        examples=["Munich", "Berlin"],
-    ),
-    FormField(
-        field_id="previous_address",
-        label="Previous address",
-        description="Your previous address (street, postal code, city)",
-        field_type="text",
-        required=False,
-    ),
+    _anmeldung_to_form_field(f) for f in ANMELDUNG_FORM_FIELDS
 ]
+"""
+Complete list of form fields for the Anmeldung voice form.
+
+Derived from anmeldung_fields.ANMELDUNG_FORM_FIELDS. Fields are presented
+to the model in this order.
+"""

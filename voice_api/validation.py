@@ -1,56 +1,85 @@
-"""Validation helpers for form fields."""
+"""Validation helpers for form fields.
+
+This module provides field validation by dispatching to validators in pdf_validators.py
+based on the field's validator_type. It also provides helper functions for displaying
+enum values to users.
+"""
 
 from __future__ import annotations
 
-import re
-from datetime import datetime
-from typing import Callable, Dict, Tuple
+from typing import Tuple
 
 from .schema import FormField
+from .pdf_validators import validate_by_type
 
 ValidationResult = Tuple[bool, str]
-
-
-def _validate_non_empty(value: str) -> ValidationResult:
-    if value and value.strip():
-        return True, ""
-    return False, "Please provide a value."
-
-
-def _validate_date(value: str) -> ValidationResult:
-    try:
-        datetime.strptime(value, "%Y-%m-%d")
-        return True, ""
-    except Exception:  # noqa: BLE001
-        return False, "Use format YYYY-MM-DD."
-
-
-def _validate_postal_code(value: str) -> ValidationResult:
-    if re.fullmatch(r"\d{5}", value or ""):
-        return True, ""
-    return False, "Postal code must be 5 digits."
-
-
-def _validate_text(value: str) -> ValidationResult:
-    return _validate_non_empty(value)
-
-
-FIELD_TYPE_VALIDATORS: Dict[str, Callable[[str], ValidationResult]] = {
-    "date": _validate_date,
-    "postal_code": _validate_postal_code,
-    "text": _validate_text,
-}
+"""Result of validation: (is_valid, error_message)."""
 
 
 def validate_field(field: FormField, value: str) -> ValidationResult:
-    """Validate a value for a given form field."""
-    if field.required:
-        ok, message = _validate_non_empty(value)
-        if not ok:
-            return ok, message
+    """
+    Validate a form field value.
 
-    validator = FIELD_TYPE_VALIDATORS.get(field.field_type)
-    if validator:
-        return validator(value or "")
+    Dispatches to the appropriate validator based on field.validator_type.
+    Checks required fields and passes configuration to validators.
 
-    return True, ""
+    Args:
+        field: FormField with validator_type and validator_config
+        value: User-provided value to validate
+
+    Returns:
+        (True, "") if valid, (False, error_message) if invalid
+
+    Examples:
+        >>> from voice_api.schema import FORM_FIELDS
+        >>> field = FORM_FIELDS[0]  # family_name_p1
+        >>> validate_field(field, "Mueller")
+        (True, "")
+        >>> validate_field(field, "")
+        (False, "... is required")
+    """
+    # Check required fields
+    if field.required and (not value or not value.strip()):
+        return False, f"{field.label} is required."
+
+    # Empty value on optional field is OK
+    if not value or not value.strip():
+        return True, ""
+
+    # Dispatch to validator based on field type
+    validator_type = field.validator_type or "text"
+    validator_config = field.validator_config or {}
+
+    return validate_by_type(validator_type, value, validator_config)
+
+
+def get_enum_display(field: FormField, value: str) -> str:
+    """
+    Get human-readable display string for an enum/choice field.
+
+    Converts an integer index (as string) to a human-readable label using the
+    field's enum_values mapping. Used for logging and user feedback.
+
+    Args:
+        field: FormField with enum_values mapping
+        value: Integer value as string (e.g., "0", "1")
+
+    Returns:
+        Human-readable display string, or the original value if not found
+
+    Examples:
+        >>> from voice_api.schema import FORM_FIELDS
+        >>> gender_field = [f for f in FORM_FIELDS if f.field_id == "gender_p1"][0]
+        >>> get_enum_display(gender_field, "0")
+        'M (Male / Männlich)'
+        >>> get_enum_display(gender_field, "1")
+        'W (Female / Weiblich)'
+    """
+    if not field.enum_values:
+        return value
+
+    try:
+        idx = int(value)
+        return field.enum_values.get(idx, value)
+    except (ValueError, TypeError):
+        return value

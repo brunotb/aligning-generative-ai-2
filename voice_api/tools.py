@@ -60,6 +60,14 @@ def build_function_declarations() -> List[types.FunctionDeclaration]:
                 required=["field_id", "value"],
             ),
         ),
+        types.FunctionDeclaration(
+            name="generate_anmeldung_pdf",
+            description=(
+                "Generate the filled Anmeldung PDF from all collected form data. "
+                "Call this after all fields are successfully collected and validated."
+            ),
+            parameters=types.Schema(type=types.Type.OBJECT, properties={}),
+        ),
     ]
 
 
@@ -148,6 +156,54 @@ async def handle_tool_calls(tool_call: types.ToolCall, session: Any, form_state:
                         },
                     )
                 )
+
+        elif name == "generate_anmeldung_pdf":
+            try:
+                import os
+                from datetime import datetime
+                from .pdf_generator import generate_anmeldung_pdf
+
+                # Generate PDF
+                pdf_bytes = generate_anmeldung_pdf(form_state.answers)
+
+                # Save to output folder with timestamp
+                output_dir = "output"
+                os.makedirs(output_dir, exist_ok=True)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                output_filename = f"anmeldung_{timestamp}.pdf"
+                output_path = os.path.join(output_dir, output_filename)
+
+                with open(output_path, "wb") as f:
+                    f.write(pdf_bytes)
+
+                LOGGER.info("PDF generated and saved to %s", output_path)
+
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": True,
+                            "pdf_location": output_path,
+                            "pdf_size_bytes": len(pdf_bytes),
+                            "message": f"Anmeldung PDF successfully generated and saved to {output_path}",
+                        },
+                    )
+                )
+            except Exception as exc:  # noqa: BLE001
+                LOGGER.error("PDF generation failed: %s", exc)
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "error": str(exc),
+                            "message": "Failed to generate PDF. Please check all required fields are filled.",
+                        },
+                    )
+                )
+
         else:
             responses.append(
                 types.FunctionResponse(
