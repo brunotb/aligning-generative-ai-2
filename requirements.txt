@@ -1,0 +1,18 @@
+# Core dependencies for Aligning Generative AI - Voice API
+
+# Google Gemini AI
+google-genai>=0.3.0
+
+# Audio processing
+pyaudio>=0.2.13
+
+# PDF manipulation
+PyPDFForm>=1.5.1
+
+# Testing
+pytest>=9.0.0
+pytest-cov>=7.0.0
+pytest-Faker>=40.1.2
+
+# Optional: Document processing (if needed for extending functionality)
+docling>=2.0.0

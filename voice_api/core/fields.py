@@ -101,11 +101,11 @@ BIRTH_DATE_P1 = AnmeldungField(
     pdf_field_id="gebdat1",
     label="Date of birth",
     description=(
-        "Your date of birth in German format (day.month.year). "
-        "Example: 15.01.1990"
+        "Your date of birth (DDMMYY format - day, month, year without separators). "
+        "Example: 150190 for January 15, 1990"
     ),
-    validator=FieldValidator(type="date_de", config={"format": "DD.MM.YYYY"}),
-    examples=["15.01.1990", "01.12.1985"],
+    validator=FieldValidator(type="date_de", config={"format": "DDMMYY"}),
+    examples=["150190", "011285"],
 )
 
 BIRTH_PLACE_P1 = AnmeldungField(
@@ -202,9 +202,12 @@ MOVE_IN_DATE = AnmeldungField(
     field_id="move_in_date",
     pdf_field_id="einzug",
     label="Move-in date",
-    description="Date you moved into the new residence (DD.MM.YYYY). Example: 15.01.2025",
-    validator=FieldValidator(type="date_de", config={"format": "DD.MM.YYYY"}),
-    examples=["15.01.2025", "01.02.2025"],
+    description=(
+        "Date you moved into the new residence (DDMMYY format). "
+        "Example: 150125 for January 15, 2025"
+    ),
+    validator=FieldValidator(type="date_de", config={"format": "DDMMYY"}),
+    examples=["150125", "010225"],
 )
 
 NEW_STREET_ADDRESS = AnmeldungField(

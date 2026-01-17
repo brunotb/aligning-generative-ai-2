@@ -11,12 +11,11 @@ with different LLM integrations if needed.
 """
 
 from .handlers import handle_tool_calls
-from .prompts import SYSTEM_PROMPT_BASE, build_system_prompt
+from .prompts import build_system_prompt
 from .tools import build_function_declarations, build_tool_config
 
 __all__ = [
     # Prompts
-    "SYSTEM_PROMPT_BASE",
     "build_system_prompt",
     # Tools
     "build_function_declarations",
