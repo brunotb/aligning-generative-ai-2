@@ -12,6 +12,7 @@ from .config import LOGGER, MODEL_NAME
 from .prompts import build_system_prompt
 from .state import FormState
 from .tools import build_tool_config, handle_tool_calls
+from .vad import VoiceActivityDetector, VADConfig, SpeechState
 
 
 def build_genai_config() -> dict:
@@ -25,19 +26,70 @@ def build_genai_config() -> dict:
     }
 
 
-async def listen_to_microphone(audio: AudioPipelines, stop_event: asyncio.Event) -> None:
-    """Capture audio from microphone and enqueue for sending."""
+async def listen_to_microphone(
+    audio: AudioPipelines,
+    vad: VoiceActivityDetector,
+    stop_event: asyncio.Event,
+) -> None:
+    """Capture audio from microphone, apply VAD, and enqueue speech for sending."""
     await audio.open_mic()
     kwargs = {"exception_on_overflow": False}
+    
+    # Buffer to hold pre-speech context (last ~500ms before speech starts)
+    pre_speech_buffer = []
+    max_buffer_size = 17  # ~500ms at 30ms per frame
+    is_currently_speaking = False
+    post_speech_frames = 0  # Count frames after speech ends
+    max_post_speech_frames = 10  # Send ~300ms of silence after speech
+    
     try:
         while not stop_event.is_set():
             data = await asyncio.to_thread(
                 audio.mic_stream.read, audio.config.chunk_size, **kwargs  # type: ignore[arg-type]
             )
-            try:
-                audio.mic_queue.put_nowait({"data": data, "mime_type": "audio/pcm"})
-            except asyncio.QueueFull:
-                LOGGER.debug("Microphone queue full; dropping audio chunk")
+            
+            # Process through VAD
+            state = vad.process_frame(data)
+            
+            # Handle state transitions
+            if state == SpeechState.SPEAKING and not is_currently_speaking:
+                # Speech just started - send buffered context first
+                LOGGER.info("Speech started, flushing buffer (%d frames)", len(pre_speech_buffer))
+                for buffered_data in pre_speech_buffer:
+                    try:
+                        audio.mic_queue.put_nowait({"data": buffered_data, "mime_type": "audio/pcm"})
+                    except asyncio.QueueFull:
+                        LOGGER.debug("Queue full while flushing buffer")
+                pre_speech_buffer.clear()
+                is_currently_speaking = True
+                post_speech_frames = 0
+            
+            if state == SpeechState.SPEECH_ENDED and is_currently_speaking:
+                LOGGER.info("Speech ended, sending trailing silence")
+                is_currently_speaking = False
+                post_speech_frames = 1  # Start counting post-speech frames
+            
+            # Send audio logic
+            if is_currently_speaking or post_speech_frames > 0:
+                # Active speech or post-speech silence - send immediately
+                try:
+                    audio.mic_queue.put_nowait({"data": data, "mime_type": "audio/pcm"})
+                except asyncio.QueueFull:
+                    LOGGER.debug("Microphone queue full; dropping audio chunk")
+                
+                # Track post-speech frames
+                if post_speech_frames > 0:
+                    post_speech_frames += 1
+                    if post_speech_frames >= max_post_speech_frames:
+                        LOGGER.info("Trailing silence sent, ready for model response")
+                        post_speech_frames = 0
+                        vad.reset()
+            else:
+                # Silence - buffer for context
+                pre_speech_buffer.append(data)
+                if len(pre_speech_buffer) > max_buffer_size:
+                    pre_speech_buffer.pop(0)
+                
     except Exception as exc:  # noqa: BLE001
         LOGGER.error("Microphone read failed: %s", exc)
         stop_event.set()
@@ -146,6 +198,20 @@ async def run() -> None:
     form_state = FormState()
     stop_event = asyncio.Event()
     play_guard = asyncio.Event()
+    
+    # Initialize VAD with configuration optimized for 16kHz audio
+    # More sensitive settings to catch speech quickly but filter background noise
+    vad_config = VADConfig(
+        sample_rate=16000,
+        frame_duration_ms=30,
+        aggressiveness=3,  # Most aggressive filtering to ignore background
+        speech_start_frames=2,  # ~60ms to start (faster response)
+        speech_end_frames=20,  # ~600ms of silence to end (longer pause)
+        min_speech_duration=0.4,  # Ignore short bursts/background chatter
+        max_speech_duration=30.0,  # Auto-cutoff for long speech
+    )
+    vad = VoiceActivityDetector(vad_config)
+    LOGGER.info("VAD initialized")
 
     LOGGER.info("Connecting to model %s", MODEL_NAME)
     try:
@@ -153,7 +219,7 @@ async def run() -> None:
             LOGGER.info("Connected to Gemini Live; start speaking")
             try:
                 async with asyncio.TaskGroup() as tg:
-                    tg.create_task(listen_to_microphone(audio, stop_event))
+                    tg.create_task(listen_to_microphone(audio, vad, stop_event))
                     tg.create_task(send_realtime_audio(session, audio, play_guard, stop_event))
                     tg.create_task(receive_from_model(session, audio, play_guard, stop_event, form_state))
                     tg.create_task(play_audio(audio, play_guard, stop_event))
