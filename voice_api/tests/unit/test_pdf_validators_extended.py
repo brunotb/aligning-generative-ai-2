@@ -1,8 +1,8 @@
-"""Extended tests for voice_api.pdf_validators module."""
+"""Extended tests for voice_api.core.validators module."""
 
 import pytest
 from datetime import datetime
-from voice_api.pdf_validators import (
+from voice_api.core.validators import (
     _validate_text,
     _validate_date_de,
     _validate_integer_choice,

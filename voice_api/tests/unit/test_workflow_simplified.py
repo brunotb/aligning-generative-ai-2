@@ -1,6 +1,6 @@
 """Tests for the new simplified workflow without field_id parameter."""
 
-from voice_api import tools
+from voice_api.llm import tools
 
 
 class TestNoFieldIdHallucination:
