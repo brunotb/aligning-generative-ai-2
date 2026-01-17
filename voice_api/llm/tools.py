@@ -101,6 +101,39 @@ def build_function_declarations() -> List[types.FunctionDeclaration]:
             ),
             parameters=types.Schema(type=types.Type.OBJECT, properties={}),
         ),
+        types.FunctionDeclaration(
+            name="get_all_answers",
+            description=(
+                "Return all completed field IDs, labels, and their values. "
+                "Use this to show the user what they've entered so far or to find a field ID for correction. "
+                "Returns list of saved fields with their current values."
+            ),
+            parameters=types.Schema(type=types.Type.OBJECT, properties={}),
+        ),
+        types.FunctionDeclaration(
+            name="update_previous_field",
+            description=(
+                "Update the value of a PREVIOUSLY saved field. "
+                "Can ONLY update fields that have already been completed (field index < current index). "
+                "Cannot update the current field or skip ahead to future fields. "
+                "Always validate the new value before calling this. "
+                "Returns validation result and whether update was allowed."
+            ),
+            parameters=types.Schema(
+                type=types.Type.OBJECT,
+                properties={
+                    "field_id": types.Schema(
+                        type=types.Type.STRING,
+                        description="The field_id of the previously saved field to update (get from get_all_answers)",
+                    ),
+                    "value": types.Schema(
+                        type=types.Type.STRING,
+                        description="New validated value to save",
+                    ),
+                },
+                required=["field_id", "value"],
+            ),
+        ),
     ]
 
 
