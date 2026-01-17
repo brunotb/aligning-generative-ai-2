@@ -1,7 +1,7 @@
-"""Tests for voice_api.anmeldung_fields module."""
+"""Tests for voice_api.core.fields module."""
 
 import pytest
-from voice_api.anmeldung_fields import (
+from voice_api.core.fields import (
     AnmeldungField,
     ANMELDUNG_FORM_FIELDS,
     FIELD_BY_ID,

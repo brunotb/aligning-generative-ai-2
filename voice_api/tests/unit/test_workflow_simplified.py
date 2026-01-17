@@ -8,7 +8,7 @@ class TestNoFieldIdHallucination:
 
     def test_system_prompt_enforces_workflow(self):
         """System prompt should enforce the correct workflow sequence."""
-        from voice_api.prompts import build_system_prompt
+        from voice_api.llm import build_system_prompt
         
         prompt = build_system_prompt()
         

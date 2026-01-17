@@ -29,23 +29,6 @@ class TestModelConfiguration:
         assert "gemini" in config.MODEL_NAME.lower()
 
 
-class TestSystemPrompt:
-    """Test system prompt configuration."""
-
-    def test_system_prompt_base_exists(self):
-        """Base system prompt should be defined."""
-        assert config.SYSTEM_PROMPT_BASE is not None
-        assert isinstance(config.SYSTEM_PROMPT_BASE, str)
-
-    def test_system_prompt_mentions_form(self):
-        """System prompt should reference form filling."""
-        assert "form" in config.SYSTEM_PROMPT_BASE.lower()
-
-    def test_system_prompt_mentions_validation(self):
-        """System prompt should mention validation."""
-        assert "validat" in config.SYSTEM_PROMPT_BASE.lower()
-
-
 class TestAudioConfig:
     """Test audio configuration."""
 

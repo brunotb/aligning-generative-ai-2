@@ -1,6 +1,8 @@
 """Integration tests for form workflow."""
 
-from voice_api import schema, validation, state, pdf_generator
+from voice_api.app import FormState, validate_field
+from voice_api.core import ANMELDUNG_FORM_FIELDS, generate_anmeldung_pdf, FIELD_BY_ID, transform_answers_to_pdf_format
+from voice_api.app.validation import get_enum_display
 
 
 class TestValidationWorkflow:
@@ -8,65 +10,57 @@ class TestValidationWorkflow:
 
     def test_validate_text_field(self):
         """Text fields should validate correctly."""
-        family_name_field = [
-            f for f in schema.FORM_FIELDS if f.field_id == "family_name_p1"
-        ][0]
+        family_name_field = FIELD_BY_ID["family_name_p1"]
         
         # Valid
-        is_valid, msg = validation.validate_field(family_name_field, "Mueller")
+        is_valid, msg = validate_field(family_name_field, "Mueller")
         assert is_valid is True
         
         # Empty
-        is_valid, msg = validation.validate_field(family_name_field, "")
+        is_valid, msg = validate_field(family_name_field, "")
         assert is_valid is False
 
     def test_validate_date_field(self):
         """Date fields should validate in DD.MM.YYYY format."""
-        birth_date_field = [
-            f for f in schema.FORM_FIELDS if f.field_id == "birth_date_p1"
-        ][0]
+        birth_date_field = FIELD_BY_ID["birth_date_p1"]
         
         # Valid
-        is_valid, msg = validation.validate_field(birth_date_field, "15.01.1990")
+        is_valid, msg = validate_field(birth_date_field, "15.01.1990")
         assert is_valid is True
         
         # Invalid format
-        is_valid, msg = validation.validate_field(birth_date_field, "1990-01-15")
+        is_valid, msg = validate_field(birth_date_field, "1990-01-15")
         assert is_valid is False
         
         # Invalid day
-        is_valid, msg = validation.validate_field(birth_date_field, "32.01.1990")
+        is_valid, msg = validate_field(birth_date_field, "32.01.1990")
         assert is_valid is False
 
     def test_validate_integer_choice_field(self):
         """Choice fields should validate integer ranges."""
-        gender_field = [
-            f for f in schema.FORM_FIELDS if f.field_id == "gender_p1"
-        ][0]
+        gender_field = FIELD_BY_ID["gender_p1"]
         
         # Valid
-        is_valid, msg = validation.validate_field(gender_field, "0")
+        is_valid, msg = validate_field(gender_field, "0")
         assert is_valid is True
         
-        is_valid, msg = validation.validate_field(gender_field, "3")
+        is_valid, msg = validate_field(gender_field, "3")
         assert is_valid is True
         
         # Out of range
-        is_valid, msg = validation.validate_field(gender_field, "5")
+        is_valid, msg = validate_field(gender_field, "5")
         assert is_valid is False
 
     def test_validate_postal_code_field(self):
         """Postal code fields should validate German postal codes."""
-        postal_field = [
-            f for f in schema.FORM_FIELDS if f.field_id == "new_postal_code"
-        ][0]
+        postal_field = FIELD_BY_ID["new_postal_code"]
         
         # Valid 5-digit
-        is_valid, msg = validation.validate_field(postal_field, "80802")
+        is_valid, msg = validate_field(postal_field, "80802")
         assert is_valid is True
         
         # Invalid length
-        is_valid, msg = validation.validate_field(postal_field, "808")
+        is_valid, msg = validate_field(postal_field, "808")
         assert is_valid is False
 
 
@@ -75,14 +69,14 @@ class TestFormState:
 
     def test_initial_state(self):
         """Form should start at first field."""
-        form = state.FormState()
+        form = FormState()
         assert form.current_index == 0
         assert form.current_field() is not None
         assert form.is_complete() is False
 
     def test_record_and_advance(self):
         """Recording a value should advance to next field."""
-        form = state.FormState()
+        form = FormState()
         first_field = form.current_field()
         
         form.record_value(first_field.field_id, "Mueller")
@@ -94,7 +88,7 @@ class TestFormState:
 
     def test_set_and_clear_error(self):
         """Setting an error and then recording a value should clear it."""
-        form = state.FormState()
+        form = FormState()
         first_field = form.current_field()
         
         form.set_error(first_field.field_id, "Invalid value")
@@ -105,7 +99,7 @@ class TestFormState:
 
     def test_progress_percent(self):
         """Progress should increase as fields are filled."""
-        form = state.FormState()
+        form = FormState()
         assert form.progress_percent() == 0.0
         
         first_field = form.current_field()
@@ -116,7 +110,7 @@ class TestFormState:
 
     def test_form_completion(self):
         """Form should be complete when all fields are filled."""
-        form = state.FormState()
+        form = FormState()
         
         # Fill all fields
         while not form.is_complete():
@@ -142,7 +136,7 @@ class TestPdfFormatTransformation:
             "birth_place_p1": "Berlin"
         }
         
-        pdf_data = pdf_generator.transform_answers_to_pdf_format(answers)
+        pdf_data = transform_answers_to_pdf_format(answers)
         
         assert pdf_data["fam1"] == "Mueller"
         assert pdf_data["vorn1"] == "Max"
@@ -156,7 +150,7 @@ class TestPdfFormatTransformation:
             "housing_type": "2"
         }
         
-        pdf_data = pdf_generator.transform_answers_to_pdf_format(answers)
+        pdf_data = transform_answers_to_pdf_format(answers)
         
         assert pdf_data["geschl1"] == 1
         assert isinstance(pdf_data["geschl1"], int)
@@ -171,7 +165,7 @@ class TestPdfFormatTransformation:
             "move_in_date": "01.02.2025"
         }
         
-        pdf_data = pdf_generator.transform_answers_to_pdf_format(answers)
+        pdf_data = transform_answers_to_pdf_format(answers)
         
         assert pdf_data["gebdat1"] == "15.01.1990"
         assert pdf_data["einzug"] == "01.02.2025"
@@ -183,7 +177,7 @@ class TestPdfFormatTransformation:
             "unknown_field": "should be ignored"
         }
         
-        pdf_data = pdf_generator.transform_answers_to_pdf_format(answers)
+        pdf_data = transform_answers_to_pdf_format(answers)
         
         assert "fam1" in pdf_data
         assert len(pdf_data) == 1  # Only known field
@@ -206,7 +200,7 @@ class TestPdfFormatTransformation:
             "housing_type": "1"
         }
         
-        pdf_data = pdf_generator.transform_answers_to_pdf_format(answers)
+        pdf_data = transform_answers_to_pdf_format(answers)
         
         # Check all PDF field IDs are present
         assert pdf_data["fam1"] == "Mueller"
@@ -229,28 +223,22 @@ class TestEnumDisplay:
 
     def test_get_enum_display_gender(self):
         """Gender field should display enum labels."""
-        gender_field = [
-            f for f in schema.FORM_FIELDS if f.field_id == "gender_p1"
-        ][0]
+        gender_field = FIELD_BY_ID["gender_p1"]
         
-        assert "Male" in validation.get_enum_display(gender_field, "0")
-        assert "Female" in validation.get_enum_display(gender_field, "1")
-        assert "Diverse" in validation.get_enum_display(gender_field, "3")
+        assert "Male" in get_enum_display(gender_field, "0")
+        assert "Female" in get_enum_display(gender_field, "1")
+        assert "Diverse" in get_enum_display(gender_field, "3")
 
     def test_get_enum_display_unknown_value(self):
         """Unknown enum value should return original value."""
-        gender_field = [
-            f for f in schema.FORM_FIELDS if f.field_id == "gender_p1"
-        ][0]
+        gender_field = FIELD_BY_ID["gender_p1"]
         
-        result = validation.get_enum_display(gender_field, "999")
+        result = get_enum_display(gender_field, "999")
         assert result == "999"
 
     def test_get_enum_display_non_choice_field(self):
         """Non-choice fields should return value as-is."""
-        name_field = [
-            f for f in schema.FORM_FIELDS if f.field_id == "family_name_p1"
-        ][0]
+        name_field = FIELD_BY_ID["family_name_p1"]
         
-        result = validation.get_enum_display(name_field, "Mueller")
+        result = get_enum_display(name_field, "Mueller")
         assert result == "Mueller"
