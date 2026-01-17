@@ -1,0 +1,432 @@
+{
+    "type": "object",
+    "properties": {
+        "einzug": {
+            "type": "string",
+            "description": "Einzugsdatum: Reihenfolge: Tag - Monat - Jahr"
+        },
+        "neuw.strasse": {
+            "type": "string",
+            "description": "Neue Wohnung (Straße/Platz, Hausnummer, Stockwerk)"
+        },
+        "nw.plz": {
+            "type": "string",
+            "description": "Neue Wohnung (Postleitzahl)"
+        },
+        "bishwo.strasse": {
+            "type": "string",
+            "description": "Bisherige Wohnung (Straße/Platz, Hausnummer, Stockwerk)"
+        },
+        "bishwo.plz": {
+            "type": "string",
+            "description": "Bisherige Wohnung (Postleitzahl)"
+        },
+        "bishwo.ort": {
+            "type": "string",
+            "description": "Bisherigen Wohnung (Ort/Gemeinde)"
+        },
+        "wohnung": {
+            "maximum": 2,
+            "type": "integer",
+            "description": "✚ Alleinige Wohnung: Haben Sie nur eine Wohnung im Inland, so handelt es sich um eine alleinige Wohnung und nicht um eine Hauptwohnung. ✚ Hauptwohnung: Sie ist die vorwiegend benutzte Wohnung des Einwohners. Hauptwohnung eines verheirateten oder eine Lebenspartnerschaft führenden Einwohners, der nicht dauernd getrennt lebt von seiner Familie oder seinem Lebenspartner, ist die vorwiegend benutzte Wohnung der Familie oder der Lebenspartner. Bei minderjährigen Personen ist die Hauptwohnung die Wohnung der Personensorgeberechtigten. Leben die Personensorgeberechtigten getrennt, ist Hauptwohnung die Wohnung des Personensorgeberechtigten, die von dem Minderjährigen vorwiegend benutzt wird. Bei einem entsprechenden Antrag gilt diese Regelung für behinderte Personen auch bis zur Vollendung des 25. Lebensjahres, und zwar auch dann, wenn sie in einer Behinderteneinrichtung leben. In Zweifelsfällen ist die vorwiegend benutzte Wohnung dort, wo der Schwerpunkt der Lebensbeziehungen liegt. ✚ Nebenwohnung: Ist jede weitere Wohnung im Bundesgebiet."
+        },
+        "zuzug": {
+            "type": "string",
+            "description": "Nur ausfüllen bei Zuzug aus dem Ausland: letzte Wohnung im Inland (PLZ, Ort, Straße/Platz, Haus-Nr.)"
+        },
+        "fam1": {
+            "type": "string",
+            "description": "Familienname der 1. Person: Es ist der vollständige aktuelle Familienname einschließlich Namensbestandteile anzugeben."
+        },
+        "name1": {
+            "type": "string",
+            "description": "Frühere Namen (z. B. Geburtsname) der 1. Person"
+        },
+        "vorn1": {
+            "type": "string",
+            "description": "Vorname(n) (Rufname unterstreichen) der 1. Person: Sind nur in der personenstandsrechtlich beurkundeten Form anzugeben."
+        },
+        "fam2": {
+            "type": "string",
+            "description": "Familienname der 2. Person: Es ist der vollständige aktuelle Familienname einschließlich Namensbestandteile anzugeben."
+        },
+        "name2": {
+            "type": "string",
+            "description": "Frühere Namen (z. B. Geburtsname) der 2. Person"
+        },
+        "vorn2": {
+            "type": "string",
+            "description": "Vorname(n) (Rufname unterstreichen) der 2. Person: Sind nur in der personenstandsrechtlich beurkundeten Form anzugeben."
+        },
+        "fam3": {
+            "type": "string",
+            "description": "Familienname der 3. Person: Es ist der vollständige aktuelle Familienname einschließlich Namensbestandteile anzugeben."
+        },
+        "name3": {
+            "type": "string",
+            "description": "Frühere Namen (z. B. Geburtsname) der 3. Person"
+        },
+        "vorn3": {
+            "type": "string",
+            "description": "Vorname(n) (Rufname unterstreichen) der 3. Person: Sind nur in der personenstandsrechtlich beurkundeten Form anzugeben."
+        },
+        "fam4": {
+            "type": "string",
+            "description": "Familienname der 4. Person: Es ist der vollständige aktuelle Familienname einschließlich Namensbestandteile anzugeben."
+        },
+        "name4": {
+            "type": "string",
+            "description": "Frühere Namen (z. B. Geburtsname) der 4. Person"
+        },
+        "vorn4": {
+            "type": "string",
+            "description": "Vorname(n) (Rufname unterstreichen) der 4. Person: Sind nur in der personenstandsrechtlich beurkundeten Form anzugeben."
+        },
+        "gr1": {
+            "type": "string",
+            "description": "Doktorgrad der 1. Person: ✚ Doktorgrad (im Bundesgebiet erworben): Für melderechtliche Zwecke ist lediglich die Angabe des Doktorgrades in der abgekürzten Form „Dr.“ und „DR.“ ohne weiteren Zusatz (z. B. „med.“) erforderlich. Wenn er ehrenhalber verliehen ist, ist der Zusatz „hc.“, „eh.“ oder „Eh.“ hinzuzufügen. ✚ Doktorgrad (im Ausland erworben): Dieser kann in das Melderegister nur dann eingetragen werden, wenn der Inhaber in der Bundesrepublik Deutschland zur Führung der Abkürzung \"Dr.\" berechtigt ist. Eine Aussage, welche ausländischen akademischen Grade hiervon betroffen sind, kann auf Grund der gesetzlichen Vorgaben des Bayerischen Hochschulgesetzes nicht generell erfolgen. Die Prüfung der Führungsberechtigung und der damit verbundenen Eintragungsfähigkeit ins Melderegister kann nur durch die Vorlage der Promotionsurkunde im Original und deren beglaubigter Übersetzung ins Deutsche erfolgen."
+        },
+        "famst1": {
+            "type": "integer",
+            "maximum": 10,
+            "description": "Familienstand der 1. Person: : Hier ist der personenstandsrechtliche Familienstand anzugeben: ✚ LD - ledig ✚ VH - verheiratet ✚ VW - verwitwet ✚ GS - geschieden ✚  LP - eingetragene Lebenspartnerschaft ✚ LV - Lebenspartner verstorben ✚ LA - Lebenspartnerschaft aufgehoben ✚ EA - Ehe aufgehoben ✚ LE - Lebenspartner für tot erklärt ✚ NB - nicht bekannt"
+        },
+        "geschl1": {
+            "maximum": 3,
+            "type": "integer",
+            "description": "Geschlecht der 1. Person: Für die Angabe des Geschlechts verwenden Sie bitte die folgenden Abkürzungen: ✚ M – männlich ✚ W – weiblich ✚ o.A. – ohne Angabe ✚ D - divers (Kann das Kind weder dem weiblichen noch dem männlichen Geschlecht zugeordnet werden, so kann der Personenstandsfall auch ohne eine solche Angabe oder mit der Angabe \"divers\" in das Geburtenregister eingetragen werden (§ 22 Abs. 3 PStG))"
+        },
+        "gebdat1": {
+            "type": "string",
+            "description": "Geburtsdatum der 1. Person: Reihenfolge Tag - Monat - Jahr"
+        },
+        "gebort1": {
+            "type": "string",
+            "description": "Geburtsort (Gemeinde, Landkreis; falls Ausland auch Staat angeben) der 1. Person"
+        },
+        "gr2": {
+            "type": "string",
+            "description": "Doktorgrad der 2. Person: ✚ Doktorgrad (im Bundesgebiet erworben): Für melderechtliche Zwecke ist lediglich die Angabe des Doktorgrades in der abgekürzten Form „Dr.“ und „DR.“ ohne weiteren Zusatz (z. B. „med.“) erforderlich. Wenn er ehrenhalber verliehen ist, ist der Zusatz „hc.“, „eh.“ oder „Eh.“ hinzuzufügen. ✚ Doktorgrad (im Ausland erworben): Dieser kann in das Melderegister nur dann eingetragen werden, wenn der Inhaber in der Bundesrepublik Deutschland zur Führung der Abkürzung \"Dr.\" berechtigt ist. Eine Aussage, welche ausländischen akademischen Grade hiervon betroffen sind, kann auf Grund der gesetzlichen Vorgaben des Bayerischen Hochschulgesetzes nicht generell erfolgen. Die Prüfung der Führungsberechtigung und der damit verbundenen Eintragungsfähigkeit ins Melderegister kann nur durch die Vorlage der Promotionsurkunde im Original und deren beglaubigter Übersetzung ins Deutsche erfolgen."
+        },
+        "famst2": {
+            "type": "integer",
+            "maximum": 10,
+            "description": "Familienstand der 2. Person: : Hier ist der personenstandsrechtliche Familienstand anzugeben: ✚ LD - ledig ✚ VH - verheiratet ✚ VW - verwitwet ✚ GS - geschieden ✚  LP - eingetragene Lebenspartnerschaft ✚ LV - Lebenspartner verstorben ✚ LA - Lebenspartnerschaft aufgehoben ✚ EA - Ehe aufgehoben ✚ LE - Lebenspartner für tot erklärt ✚ NB - nicht bekannt"
+        },
+        "geschl2": {
+            "maximum": 3,
+            "type": "integer",
+            "description": "Geschlecht der 2. Person: Für die Angabe des Geschlechts verwenden Sie bitte die folgenden Abkürzungen: ✚ M – männlich ✚ W – weiblich ✚ o.A. – ohne Angabe ✚ D - divers (Kann das Kind weder dem weiblichen noch dem männlichen Geschlecht zugeordnet werden, so kann der Personenstandsfall auch ohne eine solche Angabe oder mit der Angabe \"divers\" in das Geburtenregister eingetragen werden (§ 22 Abs. 3 PStG))"
+        },
+        "gebdat2": {
+            "type": "string",
+            "description": "Geburtsdatum der 2. Person: Reihenfolge Tag - Monat - Jahr"
+        },
+        "gebort2": {
+            "type": "string",
+            "description": "Geburtsort (Gemeinde, Landkreis; falls Ausland auch Staat angeben) der 2. Person"
+        },
+        "gr3": {
+            "type": "string",
+            "description": "Doktorgrad der 3. Person: ✚ Doktorgrad (im Bundesgebiet erworben): Für melderechtliche Zwecke ist lediglich die Angabe des Doktorgrades in der abgekürzten Form „Dr.“ und „DR.“ ohne weiteren Zusatz (z. B. „med.“) erforderlich. Wenn er ehrenhalber verliehen ist, ist der Zusatz „hc.“, „eh.“ oder „Eh.“ hinzuzufügen. ✚ Doktorgrad (im Ausland erworben): Dieser kann in das Melderegister nur dann eingetragen werden, wenn der Inhaber in der Bundesrepublik Deutschland zur Führung der Abkürzung \"Dr.\" berechtigt ist. Eine Aussage, welche ausländischen akademischen Grade hiervon betroffen sind, kann auf Grund der gesetzlichen Vorgaben des Bayerischen Hochschulgesetzes nicht generell erfolgen. Die Prüfung der Führungsberechtigung und der damit verbundenen Eintragungsfähigkeit ins Melderegister kann nur durch die Vorlage der Promotionsurkunde im Original und deren beglaubigter Übersetzung ins Deutsche erfolgen."
+        },
+        "famst3": {
+            "type": "integer",
+            "maximum": 10,
+            "description": "Familienstand der 3. Person: Hier ist der personenstandsrechtliche Familienstand anzugeben: ✚ LD - ledig ✚ VH - verheiratet ✚ VW - verwitwet ✚ GS - geschieden ✚  LP - eingetragene Lebenspartnerschaft ✚ LV - Lebenspartner verstorben ✚ LA - Lebenspartnerschaft aufgehoben ✚ EA - Ehe aufgehoben ✚ LE - Lebenspartner für tot erklärt ✚ NB - nicht bekannt"
+        },
+        "geschl3": {
+            "maximum": 3,
+            "type": "integer",
+            "description": "Geschlecht der 3. Person: Für die Angabe des Geschlechts verwenden Sie bitte die folgenden Abkürzungen: ✚ M – männlich ✚ W – weiblich ✚ o.A. – ohne Angabe ✚ D - divers (Kann das Kind weder dem weiblichen noch dem männlichen Geschlecht zugeordnet werden, so kann der Personenstandsfall auch ohne eine solche Angabe oder mit der Angabe \"divers\" in das Geburtenregister eingetragen werden (§ 22 Abs. 3 PStG))"
+        },
+        "gebdat3": {
+            "type": "string",
+            "description": "Geburtsdatum der 3. Person: Reihenfolge Tag - Monat - Jahr"
+        },
+        "gebort3": {
+            "type": "string",
+            "description": "Geburtsort (Gemeinde, Landkreis; falls Ausland auch Staat angeben) der 3. Person"
+        },
+        "gr4": {
+            "type": "string",
+            "description": "Doktorgrad der 4. Person: ✚ Doktorgrad (im Bundesgebiet erworben): Für melderechtliche Zwecke ist lediglich die Angabe des Doktorgrades in der abgekürzten Form „Dr.“ und „DR.“ ohne weiteren Zusatz (z. B. „med.“) erforderlich. Wenn er ehrenhalber verliehen ist, ist der Zusatz „hc.“, „eh.“ oder „Eh.“ hinzuzufügen. ✚ Doktorgrad (im Ausland erworben): Dieser kann in das Melderegister nur dann eingetragen werden, wenn der Inhaber in der Bundesrepublik Deutschland zur Führung der Abkürzung \"Dr.\" berechtigt ist. Eine Aussage, welche ausländischen akademischen Grade hiervon betroffen sind, kann auf Grund der gesetzlichen Vorgaben des Bayerischen Hochschulgesetzes nicht generell erfolgen. Die Prüfung der Führungsberechtigung und der damit verbundenen Eintragungsfähigkeit ins Melderegister kann nur durch die Vorlage der Promotionsurkunde im Original und deren beglaubigter Übersetzung ins Deutsche erfolgen."
+        },
+        "famst4": {
+            "type": "integer",
+            "maximum": 10,
+            "description": "Familienstand der 4. Person: Hier ist der personenstandsrechtliche Familienstand anzugeben: ✚ LD - ledig ✚ VH - verheiratet ✚ VW - verwitwet ✚ GS - geschieden ✚  LP - eingetragene Lebenspartnerschaft ✚ LV - Lebenspartner verstorben ✚ LA - Lebenspartnerschaft aufgehoben ✚ EA - Ehe aufgehoben ✚ LE - Lebenspartner für tot erklärt ✚ NB - nicht bekannt"
+        },
+        "geschl4": {
+            "maximum": 3,
+            "type": "integer",
+            "description": "Geschlecht der 4. Person: Für die Angabe des Geschlechts verwenden Sie bitte die folgenden Abkürzungen: ✚ M – männlich ✚ W – weiblich ✚ o.A. – ohne Angabe ✚ D - divers (Kann das Kind weder dem weiblichen noch dem männlichen Geschlecht zugeordnet werden, so kann der Personenstandsfall auch ohne eine solche Angabe oder mit der Angabe \"divers\" in das Geburtenregister eingetragen werden (§ 22 Abs. 3 PStG))"
+        },
+        "gebdat4": {
+            "type": "string",
+            "description": "Geburtsdatum der 4. Person: Reihenfolge Tag - Monat - Jahr"
+        },
+        "gebort4": {
+            "type": "string",
+            "description": "Geburtsort (Gemeinde, Landkreis; falls Ausland auch Staat angeben) der 4. Person"
+        },
+        "ordenskuenstler1": {
+            "type": "string",
+            "description": "Ordens- oder Künstlername der 1. Person"
+        },
+        "staatsang1": {
+            "type": "string",
+            "description": "Staatsangehörigkeit der 1. Person: Personen mit mehrfacher Staatsangehörigkeit haben sämtliche Staatsangehörigkeiten, Staatenlose ggf. auch ihre letzte Staatsangehörigkeit anzugeben."
+        },
+        "rel1": {
+            "type": "integer",
+            "maximum": 22,
+            "description": "Religion der 1. Person: Für melderechtliche Zwecke ist lediglich die Angabe der Zugehörigkeit zu einer öffentlich-rechtlichen Religionsgesellschaft erforderlich. Soweit Sie einer anderen öffentlich-rechtlichen Religionsgesellschaft angehören, als hier angeführt, ist deren vollständige Bezeichnung anzugeben. Bitte verwenden Sie in folgenden Fällen die angegebenen Abkürzungen: ✚ rk - Römisch-katholisch ✚ ak – Altkatholisch ✚ fa - Freie Religionsgemeinschaft Alzey ✚ fb - Freireligiöse Landesgemeinde Baden ✚ fg - Freireligiöse Landesgemeinde Pfalz ✚ fm - Freireligiöse Gemeinde Mainz ✚ fs - Freireligiöse Gemeinde Offenbach ✚ - keiner steuererhebenden Religionsgemeinschaft angehörend ✚ ev – Evangelisch ✚ lt - Evangelisch-lutherisch ✚ rf - Evangelisch-refomiert ✚ fr - Französisch-reformiert ✚ ib - Israelitische Religionsgemeinschaft Baden ✚ iw - Israelitische Religionsgemeinschaft Württemberg ✚ isby - Landesverband der israelitischen Kultusgemeinden in Bayern ✚ ishe - Jüdische Gemeinde Frankfurt ✚ il - Jüdische Gemeinden im Landesverband Hessen ✚ isnw - Nordrhein-Westfalen: israelitisch (jüdisch) ✚ jh - Jüdische Gemeinde Hamburg ✚ isrp - Jüdische Kultusgemeinden Bad Kreuznach und Koblenz ✚ issl - Saarland: israelitisch ✚ oa - keiner öffentlich-rechtlichen Religionsgesellschaft angehörig"
+        },
+        "dat1": {
+            "type": "string",
+            "description": "Datum und Ort der Eheschließung/der Begründung der Lebenspartnerschaft der 1. Person"
+        },
+        "ordenskuenstler2": {
+            "type": "string",
+            "description": "Ordens- oder Künstlername der 2. Person"
+        },
+        "staatsang2": {
+            "type": "string",
+            "description": "Staatsangehörigkeit der 2. Person: Personen mit mehrfacher Staatsangehörigkeit haben sämtliche Staatsangehörigkeiten, Staatenlose ggf. auch ihre letzte Staatsangehörigkeit anzugeben."
+        },
+        "rel2": {
+            "type": "integer",
+            "maximum": 22,
+            "description": "Religion der 2. Person: Für melderechtliche Zwecke ist lediglich die Angabe der Zugehörigkeit zu einer öffentlich-rechtlichen Religionsgesellschaft erforderlich. Soweit Sie einer anderen öffentlich-rechtlichen Religionsgesellschaft angehören, als hier angeführt, ist deren vollständige Bezeichnung anzugeben. Bitte verwenden Sie in folgenden Fällen die angegebenen Abkürzungen: ✚ rk - Römisch-katholisch ✚ ak – Altkatholisch ✚ fa - Freie Religionsgemeinschaft Alzey ✚ fb - Freireligiöse Landesgemeinde Baden ✚ fg - Freireligiöse Landesgemeinde Pfalz ✚ fm - Freireligiöse Gemeinde Mainz ✚ fs - Freireligiöse Gemeinde Offenbach ✚ - keiner steuererhebenden Religionsgemeinschaft angehörend ✚ ev – Evangelisch ✚ lt - Evangelisch-lutherisch ✚ rf - Evangelisch-refomiert ✚ fr - Französisch-reformiert ✚ ib - Israelitische Religionsgemeinschaft Baden ✚ iw - Israelitische Religionsgemeinschaft Württemberg ✚ isby - Landesverband der israelitischen Kultusgemeinden in Bayern ✚ ishe - Jüdische Gemeinde Frankfurt ✚ il - Jüdische Gemeinden im Landesverband Hessen ✚ isnw - Nordrhein-Westfalen: israelitisch (jüdisch) ✚ jh - Jüdische Gemeinde Hamburg ✚ isrp - Jüdische Kultusgemeinden Bad Kreuznach und Koblenz ✚ issl - Saarland: israelitisch ✚ oa - keiner öffentlich-rechtlichen Religionsgesellschaft angehörig"
+        },
+        "dat2": {
+            "type": "string",
+            "description": "Datum und Ort der Eheschließung/der Begründung der Lebenspartnerschaft der 2. Person"
+        },
+        "ordenskuenstler3": {
+            "type": "string",
+            "description": "Ordens- oder Künstlername der 3. Person"
+        },
+        "staatsang3": {
+            "type": "string",
+            "description": "Staatsangehörigkeit der 3. Person: Personen mit mehrfacher Staatsangehörigkeit haben sämtliche Staatsangehörigkeiten, Staatenlose ggf. auch ihre letzte Staatsangehörigkeit anzugeben."
+        },
+        "rel3": {
+            "type": "integer",
+            "maximum": 22,
+            "description": "Religion der 3. Person: Für melderechtliche Zwecke ist lediglich die Angabe der Zugehörigkeit zu einer öffentlich-rechtlichen Religionsgesellschaft erforderlich. Soweit Sie einer anderen öffentlich-rechtlichen Religionsgesellschaft angehören, als hier angeführt, ist deren vollständige Bezeichnung anzugeben. Bitte verwenden Sie in folgenden Fällen die angegebenen Abkürzungen: ✚ rk - Römisch-katholisch ✚ ak – Altkatholisch ✚ fa - Freie Religionsgemeinschaft Alzey ✚ fb - Freireligiöse Landesgemeinde Baden ✚ fg - Freireligiöse Landesgemeinde Pfalz ✚ fm - Freireligiöse Gemeinde Mainz ✚ fs - Freireligiöse Gemeinde Offenbach ✚ - keiner steuererhebenden Religionsgemeinschaft angehörend ✚ ev – Evangelisch ✚ lt - Evangelisch-lutherisch ✚ rf - Evangelisch-refomiert ✚ fr - Französisch-reformiert ✚ ib - Israelitische Religionsgemeinschaft Baden ✚ iw - Israelitische Religionsgemeinschaft Württemberg ✚ isby - Landesverband der israelitischen Kultusgemeinden in Bayern ✚ ishe - Jüdische Gemeinde Frankfurt ✚ il - Jüdische Gemeinden im Landesverband Hessen ✚ isnw - Nordrhein-Westfalen: israelitisch (jüdisch) ✚ jh - Jüdische Gemeinde Hamburg ✚ isrp - Jüdische Kultusgemeinden Bad Kreuznach und Koblenz ✚ issl - Saarland: israelitisch ✚ oa - keiner öffentlich-rechtlichen Religionsgesellschaft angehörig"
+        },
+        "dat3": {
+            "type": "string",
+            "description": "Datum und Ort der Eheschließung/der Begründung der Lebenspartnerschaft der 3. Person"
+        },
+        "ordenskuenstler4": {
+            "type": "string",
+            "description": "Ordens- oder Künstlername der 4. Person"
+        },
+        "staatsang4": {
+            "type": "string",
+            "description": "Staatsangehörigkeit der 4. Person: Personen mit mehrfacher Staatsangehörigkeit haben sämtliche Staatsangehörigkeiten, Staatenlose ggf. auch ihre letzte Staatsangehörigkeit anzugeben."
+        },
+        "rel4": {
+            "type": "integer",
+            "maximum": 22,
+            "description": "Religion der 4. Person: Für melderechtliche Zwecke ist lediglich die Angabe der Zugehörigkeit zu einer öffentlich-rechtlichen Religionsgesellschaft erforderlich. Soweit Sie einer anderen öffentlich-rechtlichen Religionsgesellschaft angehören, als hier angeführt, ist deren vollständige Bezeichnung anzugeben. Bitte verwenden Sie in folgenden Fällen die angegebenen Abkürzungen: ✚ rk - Römisch-katholisch ✚ ak – Altkatholisch ✚ fa - Freie Religionsgemeinschaft Alzey ✚ fb - Freireligiöse Landesgemeinde Baden ✚ fg - Freireligiöse Landesgemeinde Pfalz ✚ fm - Freireligiöse Gemeinde Mainz ✚ fs - Freireligiöse Gemeinde Offenbach ✚ - keiner steuererhebenden Religionsgemeinschaft angehörend ✚ ev – Evangelisch ✚ lt - Evangelisch-lutherisch ✚ rf - Evangelisch-refomiert ✚ fr - Französisch-reformiert ✚ ib - Israelitische Religionsgemeinschaft Baden ✚ iw - Israelitische Religionsgemeinschaft Württemberg ✚ isby - Landesverband der israelitischen Kultusgemeinden in Bayern ✚ ishe - Jüdische Gemeinde Frankfurt ✚ il - Jüdische Gemeinden im Landesverband Hessen ✚ isnw - Nordrhein-Westfalen: israelitisch (jüdisch) ✚ jh - Jüdische Gemeinde Hamburg ✚ isrp - Jüdische Kultusgemeinden Bad Kreuznach und Koblenz ✚ issl - Saarland: israelitisch ✚ oa - keiner öffentlich-rechtlichen Religionsgesellschaft angehörig"
+        },
+        "dat4": {
+            "type": "string",
+            "description": "Datum und Ort der Eheschließung/der Begründung der Lebenspartnerschaft der 4. Person"
+        },
+        "art1": {
+            "type": "integer",
+            "maximum": 5,
+            "description": "Pass- und Ausweisdaten der 1. Person: Für die Angabe der Art des Ausweisdokuments verwenden Sie bitte die angegebenen Abkürzungen: ✚ PA – Personalausweis ✚ RP – Reisepass ✚ KRP – Kinderreisepass ✚ KA - Kinderausweis ✚ AKN - Ankunftsnachweis"
+        },
+        "serien1": {
+            "type": "string",
+            "description": "1. Person: Seriennummer"
+        },
+        "ausstellb1": {
+            "type": "string",
+            "description": "Ausstellungsbehörde Pass/Ausweis 1. Person"
+        },
+        "ausstelldat1": {
+            "type": "string",
+            "description": "Ausstellungsdatum Pass/Ausweis 1. Person"
+        },
+        "gueltig1": {
+            "type": "string",
+            "description": "Pass/Ausweis 1. Person gültig bis "
+        },
+        "vertrieb1": {
+            "type": "string",
+            "description": "1. Person: Für Flüchtlinge/Vertriebene: Wohnsitz am 01. September 1939 (Wohnort, Landkreis, Provinz): Diese Angabe wird zur Unterrichtung des kirchlichen Suchdienstes benötigt."
+        },
+        "art2": {
+            "type": "integer",
+            "maximum": 5,
+            "description": "Pass- und Ausweisdaten der 2. Person: Für die Angabe der Art des Ausweisdokuments verwenden Sie bitte die angegebenen Abkürzungen: ✚ PA – Personalausweis ✚ RP – Reisepass ✚ KRP – Kinderreisepass ✚ KA - Kinderausweis ✚ AKN - Ankunftsnachweis"
+        },
+        "serien2": {
+            "type": "string",
+            "description": "2. Person: Seriennummer"
+        },
+        "ausstellb2": {
+            "type": "string",
+            "description": "Ausstellungsbehörde Pass/Ausweis 2. Person"
+        },
+        "ausstelldat2": {
+            "type": "string",
+            "description": "Ausstellungsdatum Pass/Ausweis 2. Person"
+        },
+        "gueltig2": {
+            "type": "string",
+            "description": "Pass/Ausweis 2. Person gültig bis"
+        },
+        "vertrieb2": {
+            "type": "string",
+            "description": "2. Person: Für Flüchtlinge/Vertriebene: Wohnsitz am 01. September 1939 (Wohnort, Landkreis, Provinz): Diese Angabe wird zur Unterrichtung des kirchlichen Suchdienstes benötigt."
+        },
+        "art3": {
+            "type": "integer",
+            "maximum": 5,
+            "description": "Pass- und Ausweisdaten der 3. Person: Für die Angabe der Art des Ausweisdokuments verwenden Sie bitte die angegebenen Abkürzungen: ✚ PA – Personalausweis ✚ RP – Reisepass ✚ KRP – Kinderreisepass ✚ KA - Kinderausweis ✚ AKN - Ankunftsnachweis"
+        },
+        "serien3": {
+            "type": "string",
+            "description": "3. Person: Seriennummer"
+        },
+        "ausstellb3": {
+            "type": "string",
+            "description": "Ausstellungsbehörde Pass/Ausweis 3. Person"
+        },
+        "ausstelldat3": {
+            "type": "string",
+            "description": "Ausstellungsdatum Pass/Ausweis 3. Person"
+        },
+        "gueltig3": {
+            "type": "string",
+            "description": "Pass/Ausweis 3. Person gültig bis"
+        },
+        "vertrieb3": {
+            "type": "string",
+            "description": "3. Person: Für Flüchtlinge/Vertriebene: Wohnsitz am 01. September 1939 (Wohnort, Landkreis, Provinz): Diese Angabe wird zur Unterrichtung des kirchlichen Suchdienstes benötigt."
+        },
+        "art4": {
+            "type": "integer",
+            "maximum": 5,
+            "description": "Pass- und Ausweisdaten der 4. Person: Für die Angabe der Art des Ausweisdokuments verwenden Sie bitte die angegebenen Abkürzungen: ✚ PA – Personalausweis ✚ RP – Reisepass ✚ KRP – Kinderreisepass ✚ KA - Kinderausweis ✚ AKN - Ankunftsnachweis"
+        },
+        "serien4": {
+            "type": "string",
+            "description": "4. Person: Seriennummer"
+        },
+        "ausstellb4": {
+            "type": "string",
+            "description": "Ausstellungsbehörde Pass/Ausweis 4. Person"
+        },
+        "ausstelldat4": {
+            "type": "string",
+            "description": "Ausstellungsdatum Pass/Ausweis 4. Person"
+        },
+        "gueltig4": {
+            "type": "string",
+            "description": "Pass/Ausweis 4. Person gültig bis"
+        },
+        "vertrieb4": {
+            "type": "string",
+            "description": "4. Person: Für Flüchtlinge/Vertriebene: Wohnsitz am 01. September 1939 (Wohnort, Landkreis, Provinz): Diese Angabe wird zur Unterrichtung des kirchlichen Suchdienstes benötigt."
+        },
+        "gesetzlver": {
+            "type": "string",
+            "description": "Gesetzliche Vertreter (Vor und Familienname, Doktorgrad, Geburtsdatum, Anschrift): Die gesetzlichen Vertreter sind nur bei der Anmeldung von Minderjährigen und von Personen, für die ein Betreuer bestellt ist, der den Aufenthalt bestimmen kann, anzugeben. Die Angabe entfällt bei der gemeinsamen Anmeldung von Eltern und Kindern."
+        },
+        "getrennt1": {
+            "maximum": 1,
+            "type": "integer",
+            "description": "Leben Sie dauerhaft getrennt von Ihrer/m nicht mitzuziehenden Ehe-/Lebenspartner*in?: Diese Angabe benötigen die Meldebehörden für die Bestimmung des Status der Wohnung (alleinige Wohnung, Haupt- oder Nebenwohnung). Eine Speicherung dieser Angaben erfolgt nicht."
+        },
+        "fam5": {
+            "type": "string",
+            "description": "Familienname der/des nicht mitziehenden Ehe-/Lebenspartner*in: Es ist der vollständige aktuelle Familienname einschließlich von Namensbestandteilen anzugeben."
+        },
+        "name5": {
+            "type": "string",
+            "description": "Frühere Name/n des nicht mitziehenden Ehegatten/Lebenspartners"
+        },
+        "vorn5": {
+            "type": "string",
+            "description": "Vorname des nicht mitziehenden Ehe-/Lebenspartner*in: Sind nur in der personenstandsrechtlich beurkundeten Form anzugeben."
+        },
+        "gr5": {
+            "type": "string",
+            "description": "Doktorgrad des Ehegatten/Lebenspartners: ✚ Doktorgrad (im Bundesgebiet erworben): Für melderechtliche Zwecke ist lediglich die Angabe des Doktorgrades in der abgekürzten Form „Dr.“ und „DR.“ ohne weiteren Zusatz (z.B. „med.“) erforderlich. Wenn er ehrenhalber verliehen ist, ist der Zusatz „h.c.“, „e.h.“ oder „E.h.“ hinzuzufügen. ✚ Doktorgrad (im Ausland erworben): Dieser kann in das Melderegister nur dann eingetragen werden, wenn der Inhaber in der Bundesrepublik Deutschland zur Führung der Abkürzung \"Dr.\" berechtigt ist. Eine Aussage, welche ausländischen akademischen Grade hiervon betroffen sind, kann auf Grund der gesetzlichen Vorgaben des Bayerischen Hochschulgesetzes nicht generell erfolgen. Die Prüfung der Führungsberechtigung und der damit verbundenen Eintragungsfähigkeit ins Melderegister kann nur durch die Vorlage der Promotionsurkunde im Original und deren beglaubigter Übersetzung ins Deutsche erfolgen."
+        },
+        "geschl6": {
+            "maximum": 3,
+            "type": "integer",
+            "description": "Geschlecht der/des nicht mitzuziehenden Ehe-/Lebenspartner*in: Für die Angabe des Geschlechts verwenden Sie bitte die folgenden Abkürzungen: ✚ M – männlich ✚ W – weiblich ✚ o.A. – ohne Angabe ✚ Divers - divers (Kann das Kind weder dem weiblichen noch dem männlichen Geschlecht zugeordnet werden, so kann der Personenstandsfall ohne eine solche Angabe oder mit der Angabe \"divers\" in das Geburtenregister eingetragen werden (§ 22 Abs. 3 PStG))"
+        },
+        "gebdat5": {
+            "type": "string",
+            "description": "Geburtsdatum der/des nicht mitziehenden Ehe-/Lebenspartner*in"
+        },
+        "gebort5": {
+            "type": "string",
+            "description": "Geburtsort der/des nicht mitzuziehenden Ehe-/Lebenspartner*in (Gemeinde, Landkreis; falls Ausland auch Staat angeben)"
+        },
+        "anschr5": {
+            "type": "string",
+            "description": "Anschrift der/des nicht mitziehenden Ehe-/Lebenspartner*in (Straße/Platz, Hausnummer)"
+        },
+        "anschr5a": {
+            "type": "string",
+            "description": "Anschrift der/des nicht mitziehenden Ehe-/Lebenspartner*in (PLZ, Ort, Gemeinde, Landreis, falls Ausland: auch Staat angeben)"
+        },
+        "Ort1": {
+            "type": "string",
+            "description": "Ort der Ausstellung"
+        },
+        "Datum1": {
+            "type": "string",
+            "description": "Datum der Ausstellung"
+        },
+        "fam_vg": {
+            "type": "string",
+            "description": "Familienname der/des Vollmachtgeber*in"
+        },
+        "vorname_vg": {
+            "type": "string",
+            "description": "Vorname(n) der/des Vollmachtgeber*in"
+        },
+        "geb_vg": {
+            "type": "string",
+            "description": "Geburtsdatum der/des Vollmachtgeber*in"
+        },
+        "fam_bev": {
+            "type": "string",
+            "description": "Familienname der/des Bevollmächtigten"
+        },
+        "vorname_bev": {
+            "type": "string",
+            "description": "Vorname(n) der/des Bevollmächtigten"
+        },
+        "geb_bev": {
+            "type": "string",
+            "description": "Geburtsdatum der/des Bevollmächtigten"
+        },
+        "anschrift_bev": {
+            "type": "string",
+            "description": "Anschrift der/des Bevollmächtigten"
+        },
+        "Ort": {
+            "type": "string",
+            "description": "Ort der Ausstellung"
+        },
+        "Datum": {
+            "type": "string",
+            "description": "Datum der Ausstellung"
+        }
+    }
+}
