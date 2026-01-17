@@ -38,26 +38,30 @@ def build_function_declarations() -> List[types.FunctionDeclaration]:
         ),
         types.FunctionDeclaration(
             name="validate_form_field",
-            description="Validate a value for a specific field and return a message if invalid.",
+            description=(
+                "Validate a value for the CURRENT field (from get_next_form_field). "
+                "Returns validation result."
+            ),
             parameters=types.Schema(
                 type=types.Type.OBJECT,
                 properties={
-                    "field_id": types.Schema(type=types.Type.STRING, description="ID of the field"),
-                    "value": types.Schema(type=types.Type.STRING, description="User-provided value"),
+                    "value": types.Schema(type=types.Type.STRING, description="User-provided value to validate"),
                 },
-                required=["field_id", "value"],
+                required=["value"],
             ),
         ),
         types.FunctionDeclaration(
             name="save_form_field",
-            description="Persist a validated value for the given field and advance progress.",
+            description=(
+                "Save the validated value for the CURRENT field and advance to next. "
+                "Always call after validate_form_field returns is_valid=true."
+            ),
             parameters=types.Schema(
                 type=types.Type.OBJECT,
                 properties={
-                    "field_id": types.Schema(type=types.Type.STRING, description="ID of the field"),
-                    "value": types.Schema(type=types.Type.STRING, description="Validated value"),
+                    "value": types.Schema(type=types.Type.STRING, description="Validated value to save"),
                 },
-                required=["field_id", "value"],
+                required=["value"],
             ),
         ),
         types.FunctionDeclaration(
@@ -108,15 +112,17 @@ async def handle_tool_calls(tool_call: types.ToolCall, session: Any, form_state:
                 )
 
         elif name == "validate_form_field":
-            field_id = args.get("field_id")
             value = args.get("value", "")
-            field = _find_field(form_state, field_id)
+            field = form_state.current_field()
             if not field:
                 responses.append(
                     types.FunctionResponse(
                         id=func_call.id,
                         name=name,
-                        response={"is_valid": False, "message": "Unknown field."},
+                        response={
+                            "is_valid": False,
+                            "message": "No field to validate. Call get_next_form_field first.",
+                        },
                     )
                 )
             else:
@@ -132,19 +138,21 @@ async def handle_tool_calls(tool_call: types.ToolCall, session: Any, form_state:
                 )
 
         elif name == "save_form_field":
-            field_id = args.get("field_id")
             value = args.get("value", "")
-            field = _find_field(form_state, field_id)
+            field = form_state.current_field()
             if not field:
                 responses.append(
                     types.FunctionResponse(
                         id=func_call.id,
                         name=name,
-                        response={"ok": False, "message": "Unknown field."},
+                        response={
+                            "ok": False,
+                            "message": "No field to save. Call get_next_form_field first.",
+                        },
                     )
                 )
             else:
-                form_state.record_value(field_id, value)
+                form_state.record_value(field.field_id, value)
                 form_state.advance()
                 responses.append(
                     types.FunctionResponse(
