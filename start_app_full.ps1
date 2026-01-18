@@ -25,7 +25,7 @@ if (-not $env:GOOGLE_API_KEY) {
 
 # Start Backend (FastAPI)
 Write-Host "[1/3] Starting Backend API Server..." -ForegroundColor Green
-$backendProcess = Start-Process powershell -ArgumentList "-NoExit", "-Command", "conda activate aligning-generative-ai; python -m uvicorn voice_api.api.server:app --host 0.0.0.0 --port 8001 --reload" -PassThru
+$backendProcess = Start-Process powershell -ArgumentList "-NoExit", "-Command", "python -m uvicorn voice_api.api.server:app --host 0.0.0.0 --port 8001 --reload" -PassThru
 Start-Sleep -Seconds 3
 
 Write-Host "[2/3] Backend API started on http://localhost:8001" -ForegroundColor Green
@@ -33,7 +33,7 @@ Write-Host ""
 
 # Start Frontend (Vite)
 Write-Host "[3/3] Starting Frontend Development Server..." -ForegroundColor Green
-$frontendProcess = Start-Process powershell -ArgumentList "-NoExit", "-Command", "conda activate aligning-generative-ai; cd frontend; npm run dev" -PassThru
+$frontendProcess = Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd frontend; npm run dev" -PassThru
 Start-Sleep -Seconds 3
 
 Write-Host "[3/3] Frontend started on http://localhost:5173" -ForegroundColor Green
