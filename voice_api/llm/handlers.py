@@ -113,6 +113,7 @@ async def handle_tool_calls(
                 )
 
         elif name == "validate_form_field":
+            provided_field_id = args.get("field_id", "")
             value = args.get("value", "")
             field = form_state.current_field()
             if not field:
@@ -123,6 +124,26 @@ async def handle_tool_calls(
                         response={
                             "is_valid": False,
                             "message": "No field to validate. Call get_next_form_field first.",
+                        },
+                    )
+                )
+            elif provided_field_id and provided_field_id != field.field_id:
+                # SAFETY CHECK: field_id must match current field
+                LOGGER.warning(
+                    "Field mismatch in validate_form_field: provided=%s, current=%s",
+                    provided_field_id,
+                    field.field_id,
+                )
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "is_valid": False,
+                            "message": (
+                                f"Field mismatch! You provided field_id='{provided_field_id}' but the current field is "
+                                f"'{field.field_id}' ({field.label}). Call get_next_form_field to get the current field."
+                            ),
                         },
                     )
                 )
@@ -198,6 +219,7 @@ async def handle_tool_calls(
                 )
 
         elif name == "save_form_field":
+            provided_field_id = args.get("field_id", "")
             value = args.get("value", "")
             field = form_state.current_field()
             if not field:
@@ -208,6 +230,27 @@ async def handle_tool_calls(
                         response={
                             "ok": False,
                             "message": "No field to save. Call get_next_form_field first.",
+                        },
+                    )
+                )
+            elif provided_field_id and provided_field_id != field.field_id:
+                # SAFETY CHECK: field_id must match current field
+                LOGGER.warning(
+                    "Field mismatch in save_form_field: provided=%s, current=%s, value=%s",
+                    provided_field_id,
+                    field.field_id,
+                    value,
+                )
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "message": (
+                                f"Field mismatch! You provided field_id='{provided_field_id}' but the current field is "
+                                f"'{field.field_id}' ({field.label}). Call get_next_form_field to get the current field."
+                            ),
                         },
                     )
                 )

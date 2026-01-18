@@ -63,34 +63,44 @@ def build_function_declarations() -> List[types.FunctionDeclaration]:
             name="validate_form_field",
             description=(
                 "Validate a value for the CURRENT field (from get_next_form_field). "
+                "You MUST provide the field_id of the current field to confirm you're validating the right field. "
                 "Returns validation result."
             ),
             parameters=types.Schema(
                 type=types.Type.OBJECT,
                 properties={
+                    "field_id": types.Schema(
+                        type=types.Type.STRING,
+                        description="The field_id of the CURRENT field you are validating (MUST match the current field from get_next_form_field)",
+                    ),
                     "value": types.Schema(
                         type=types.Type.STRING,
                         description="User-provided value to validate",
                     ),
                 },
-                required=["value"],
+                required=["field_id", "value"],
             ),
         ),
         types.FunctionDeclaration(
             name="save_form_field",
             description=(
                 "Save the validated value for the CURRENT field and advance to next. "
+                "You MUST provide the field_id of the current field to confirm you're saving to the right field. "
                 "Always call after validate_form_field returns is_valid=true."
             ),
             parameters=types.Schema(
                 type=types.Type.OBJECT,
                 properties={
+                    "field_id": types.Schema(
+                        type=types.Type.STRING,
+                        description="The field_id of the CURRENT field you are saving (MUST match the current field from get_next_form_field)",
+                    ),
                     "value": types.Schema(
                         type=types.Type.STRING,
                         description="Validated value to save",
                     ),
                 },
-                required=["value"],
+                required=["field_id", "value"],
             ),
         ),
         types.FunctionDeclaration(

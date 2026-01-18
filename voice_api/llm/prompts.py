@@ -54,13 +54,15 @@ If validation fails, patiently ask the user to correct their answer - never skip
 WORKFLOW_INSTRUCTIONS = """\
 You MUST follow this exact sequence for EVERY field:
 
-1. IMMEDIATELY call get_next_form_field() to retrieve the CURRENT field metadata
+1. IMMEDIATELY call get_next_form_field() to retrieve the CURRENT field metadata (note the field_id!)
 2. Ask the user a natural, conversational question (without mentioning format details)
 3. Listen and understand the user's input - accept it naturally as they speak it
-4. Call validate_form_field(value) with the user's answer as they provided it
-5. If VALID → call save_form_field(value) and confirm to the user
+4. Call validate_form_field(field_id, value) with the CURRENT field_id and the user's answer
+5. If VALID → call save_form_field(field_id, value) with the SAME field_id and confirm to the user
 6. If INVALID → explain briefly what went wrong and ask the user to correct
 7. Repeat from step 1 for the next field
+
+IMPORTANT: Always pass the field_id from get_next_form_field to validate and save calls. This prevents wrong field mapping.
 
 Key principle: Ask conversationally and naturally. Let the validation handle format requirements.
 Do NOT mention format details (like "DD.MM.YYYY") in your questions to the user.
@@ -150,8 +152,10 @@ get_next_form_field():
   - It returns the CURRENT field's metadata (label, description, type, constraints)
   - When it signals completion (is_complete=true), move to PDF generation
 
-validate_form_field(value: str):
-  - IMPORTANT: Parse and convert user input to the expected format BEFORE calling this tool
+validate_form_field(field_id: str, value: str):
+  - IMPORTANT: You MUST provide the field_id of the CURRENT field (from get_next_form_field)
+  - This confirms you are validating the correct field and prevents wrong field mapping
+  - Parse and convert user input to the expected format BEFORE calling this tool
   - For dates: Convert "1. Oktober 1999" or "October 1, 1999" to "01101999" (DDMMYYYY format)
   - For postal codes: Extract just the digits, remove spaces or hyphens
   - For choices: Convert user's spoken option to the numeric index (0, 1, 2, etc.)
@@ -162,12 +166,14 @@ validate_form_field(value: str):
   - Use error messages to understand what went wrong, then ask user to correct naturally
   - DO NOT list all choice options unless validation fails multiple times
 
-save_form_field(value: str):
+save_form_field(field_id: str, value: str):
+  - IMPORTANT: You MUST provide the field_id of the CURRENT field to confirm you're saving to the right field
   - Call this ONLY if validate_form_field returned is_valid=true
   - NEVER call this if validation failed - you MUST get a valid value first
+  - The field_id must match the current field from get_next_form_field
   - The value must already be validated and in correct format
   - Saves the answer and advances to the next field
-  - If save fails (returns ok=false), the value was invalid - ask user for a corrected value
+  - If save fails (returns ok=false), check the error message - it may indicate a field mismatch
 
 get_all_answers():
   - Call this when the user asks to review, check, or correct their previous answers
