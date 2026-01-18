@@ -39,6 +39,13 @@ async def sync_form_state_from_events(event: FormEvent):
     This listener ensures that when the voice pipeline saves fields,
     the server's session storage is updated so PDF generation works.
     """
+    LOGGER.info(
+        "sync_form_state_from_events received event type=%s session=%s, available_sessions=%s",
+        event.type,
+        event.session_id,
+        list(sessions.keys()),
+    )
+    
     session_id = event.session_id
     if session_id not in sessions:
         LOGGER.warning("Event received for unknown session: %s", session_id)
@@ -50,6 +57,13 @@ async def sync_form_state_from_events(event: FormEvent):
         # Update the server's form_state with the saved value
         field_id = event.data.get("field_id")
         value = event.data.get("value")
+        
+        LOGGER.info(
+            "Processing field_saved: field_id=%s, value=%s, current_answers=%d",
+            field_id,
+            value,
+            len(form_state.answers),
+        )
         
         if field_id and value is not None:
             # Record the value and advance if not already at this position
@@ -70,6 +84,21 @@ async def sync_form_state_from_events(event: FormEvent):
             )
         else:
             LOGGER.warning("field_saved event missing field_id or value: %s", event.data)
+    
+    elif event.type == "field_updated":
+        # Also sync field_updated events
+        field_id = event.data.get("field_id")
+        value = event.data.get("value")
+        
+        if field_id and value is not None:
+            form_state.record_value(field_id, value)
+            LOGGER.info(
+                "Synced field update %s=%s to server session %s (total answers: %d)",
+                field_id,
+                value,
+                session_id,
+                len(form_state.answers),
+            )
 
 
 @asynccontextmanager
