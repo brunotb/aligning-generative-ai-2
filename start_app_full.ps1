@@ -4,6 +4,18 @@
 Write-Host "=== Voice Form Assistant Startup ===" -ForegroundColor Cyan
 Write-Host ""
 
+# Load .env file if it exists
+if (Test-Path .env) {
+    Write-Host "Loading environment variables from .env..." -ForegroundColor Gray
+    Get-Content .env | ForEach-Object {
+        if ($_ -match '^([^=]+)=(.*)$') {
+            $name = $matches[1]
+            $value = $matches[2]
+            [System.Environment]::SetEnvironmentVariable($name, $value)
+        }
+    }
+}
+
 # Check if GOOGLE_API_KEY is set
 if (-not $env:GOOGLE_API_KEY) {
     Write-Host "ERROR: GOOGLE_API_KEY environment variable not set!" -ForegroundColor Red
