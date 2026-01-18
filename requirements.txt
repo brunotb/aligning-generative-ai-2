@@ -4,8 +4,7 @@
 google-genai>=0.3.0
 
 # Audio processing
-# Audio processing
-# pyaudio>=0.2.13
+pyaudio>=0.2.13
 
 # PDF manipulation
 PyPDFForm>=1.5.1
