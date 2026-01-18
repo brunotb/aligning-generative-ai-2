@@ -14,6 +14,7 @@ export function ConversationScreen() {
     answers,
     progress_percent,
     isRecording,
+    assistantStatus,
     currentDraftValue,
     translatedLabels,
     lastUpdatedFieldId,
@@ -27,7 +28,7 @@ export function ConversationScreen() {
       <div className="w-2/3 bg-white flex flex-col p-6">
         {/* Microphone Section - Top */}
         <div className="flex items-center justify-center py-8">
-          <MicrophoneIndicator isRecording={isRecording} />
+          <MicrophoneIndicator isRecording={isRecording} assistantStatus={assistantStatus} />
         </div>
 
         {/* Chat History - Bottom (scrollable) */}

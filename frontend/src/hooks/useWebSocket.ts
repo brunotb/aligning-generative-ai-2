@@ -6,7 +6,7 @@ const WS_URL = 'ws://localhost:8001/api/session/ws';
 
 export function useWebSocket(sessionId: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
-  const { setWebSocket, updateFromWSEvent, setRecording } = useFormStore();
+  const { setWebSocket, updateFromWSEvent, setRecording, setAssistantStatus } = useFormStore();
   const reconnectTimeoutRef = useRef<number>();
 
   useEffect(() => {
@@ -27,11 +27,29 @@ export function useWebSocket(sessionId: string | null) {
           console.log('[WS] Received:', message.type, message.data);
           updateFromWSEvent(message.type, message.data);
 
-          // Update recording status based on transcript events
+          // Update assistant status based on events
           if (message.type === 'transcript') {
-            if (message.data.speaker === 'assistant') {
+            if (message.data.speaker === 'user') {
+              // User finished speaking, assistant is now thinking
               setRecording(false);
+              setAssistantStatus('thinking');
+            } else if (message.data.speaker === 'assistant') {
+              // Assistant is speaking
+              setRecording(false);
+              setAssistantStatus('speaking');
             }
+          }
+
+          // After assistant finishes speaking, go back to idle
+          // This happens when we get a validation_result or field_saved after transcript
+          if (message.type === 'validation_result' || message.type === 'field_saved') {
+            // Small delay to let the speaking finish
+            setTimeout(() => {
+              const currentStatus = useFormStore.getState().assistantStatus;
+              if (currentStatus === 'speaking') {
+                setAssistantStatus('idle');
+              }
+            }, 500);
           }
         } catch (error) {
           console.error('[WS] Failed to parse message:', error);

@@ -1,9 +1,12 @@
 import { create } from 'zustand';
 import { FormField, FormState, Transcript } from '../types/form';
 
+export type AssistantStatus = 'idle' | 'listening' | 'thinking' | 'speaking';
+
 interface FormStore extends FormState {
   sessionId: string | null;
   isRecording: boolean;
+  assistantStatus: AssistantStatus; // Current status: idle, listening, thinking, speaking
   transcripts: Transcript[];
   ws: WebSocket | null;
   currentDraftValue: string; // Real-time value being discussed
@@ -18,6 +21,7 @@ interface FormStore extends FormState {
   setAnswer: (fieldId: string, value: string) => void;
   setProgress: (percent: number) => void;
   setRecording: (recording: boolean) => void;
+  setAssistantStatus: (status: AssistantStatus) => void;
   addTranscript: (speaker: 'user' | 'assistant', text: string) => void;
   setWebSocket: (ws: WebSocket | null) => void;
   updateFromWSEvent: (type: string, data: any) => void;
@@ -34,6 +38,7 @@ const initialState = {
   answers: {},
   progress_percent: 0,
   isRecording: false,
+  assistantStatus: 'idle' as AssistantStatus,
   transcripts: [],
   ws: null,
   currentDraftValue: '',
@@ -60,6 +65,8 @@ export const useFormStore = create<FormStore>((set, get) => ({
   setProgress: (percent) => set({ progress_percent: percent }),
 
   setRecording: (recording) => set({ isRecording: recording }),
+
+  setAssistantStatus: (status) => set({ assistantStatus: status }),
 
   addTranscript: (speaker, text) =>
     set((state) => ({
