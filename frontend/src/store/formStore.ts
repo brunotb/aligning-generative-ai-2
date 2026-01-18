@@ -9,7 +9,7 @@ interface FormStore extends FormState {
   currentDraftValue: string; // Real-time value being discussed
   detectedLanguage: string | null; // User's language
   translatedLabels: Record<string, string>; // field_id -> translated label
-  
+
   // Actions
   setSessionId: (id: string) => void;
   setFields: (fields: FormField[]) => void;

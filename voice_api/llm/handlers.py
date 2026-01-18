@@ -227,6 +227,20 @@ async def handle_tool_calls(
                     )
                 else:
                     form_state.record_value(field.field_id, value)
+                    
+                    # Emit field saved event
+                    event_emitter.emit_sync(
+                        FormEvent(
+                            type="field_saved",
+                            data={
+                                "field_id": field.field_id,
+                                "value": value,
+                                "progress_percent": form_state.progress_percent(),
+                            },
+                            session_id=session_id,
+                        )
+                    )
+
                     form_state.advance()
                     responses.append(
                         types.FunctionResponse(
@@ -370,6 +384,19 @@ async def handle_tool_calls(
                     field.label,
                     old_value,
                     value,
+                )
+
+                # Emit field updated event
+                event_emitter.emit_sync(
+                    FormEvent(
+                        type="field_updated",
+                        data={
+                            "field_id": field_id,
+                            "value": value,
+                            "progress_percent": form_state.progress_percent(),
+                        },
+                        session_id=session_id,
+                    )
                 )
 
                 responses.append(
