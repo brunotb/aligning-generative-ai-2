@@ -13,9 +13,11 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from typing import Optional
-
-import pyaudio
+from typing import Any, Optional
+try:
+    import pyaudio
+except ImportError:
+    pyaudio = None
 
 from ..config import LOGGER, AudioConfig, default_audio_config
 
@@ -40,16 +42,21 @@ class AudioPipelines:
     """
 
     config: AudioConfig = field(default_factory=default_audio_config)
-    pya_client: pyaudio.PyAudio = field(default_factory=pyaudio.PyAudio)
-    mic_stream: Optional[pyaudio.Stream] = None
-    speaker_stream: Optional[pyaudio.Stream] = None
+    pya_client: Any = field(init=False, default=None)
+    mic_stream: Any = None
+    speaker_stream: Any = None
     mic_queue: asyncio.Queue = field(init=False)
     playback_queue: asyncio.Queue = field(init=False)
 
     def __post_init__(self) -> None:
-        """Initialize async queues after dataclass initialization."""
+        """Initialize async queues and PyAudio client after dataclass initialization."""
         self.mic_queue = asyncio.Queue(maxsize=self.config.mic_queue_maxsize)
         self.playback_queue = asyncio.Queue()
+        
+        if pyaudio:
+            self.pya_client = pyaudio.PyAudio()
+        else:
+            LOGGER.warning("PyAudio not available; audio capture/playback will be disabled")
 
     async def open_mic(self) -> None:
         """
@@ -59,8 +66,11 @@ class AudioPipelines:
         the configured sample rate and chunk size.
 
         Raises:
-            RuntimeError: If microphone initialization fails
+            RuntimeError: If microphone initialization fails or PyAudio is missing
         """
+        if not self.pya_client:
+            raise RuntimeError("PyAudio is not installed or initialized")
+            
         device_info = await asyncio.to_thread(self.pya_client.get_default_input_device_info)
         LOGGER.info(
             "Using input device: %s (index=%s)",
@@ -85,8 +95,11 @@ class AudioPipelines:
         Opens an audio stream with the configured playback sample rate.
 
         Raises:
-            RuntimeError: If speaker initialization fails
+            RuntimeError: If speaker initialization fails or PyAudio means is missing
         """
+        if not self.pya_client:
+            raise RuntimeError("PyAudio is not installed or initialized")
+
         self.speaker_stream = await asyncio.to_thread(
             self.pya_client.open,
             format=self.config.format,
@@ -111,5 +124,8 @@ class AudioPipelines:
                     LOGGER.debug("Closed %s", stream_name)
                 except Exception as exc:  # noqa: BLE001
                     LOGGER.warning("Failed to close %s: %s", stream_name, exc)
-        self.pya_client.terminate()
-        LOGGER.info("PyAudio terminated")
+                    LOGGER.warning("Failed to close %s: %s", stream_name, exc)
+        
+        if self.pya_client:
+            self.pya_client.terminate()
+            LOGGER.info("PyAudio terminated")
