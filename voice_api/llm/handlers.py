@@ -212,30 +212,176 @@ async def handle_tool_calls(
                     )
                 )
             else:
-                form_state.record_value(field.field_id, value)
-                progress_before = form_state.progress_percent()
-                form_state.advance()
-                
-                # Emit field saved event
-                event_emitter.emit_sync(
-                    FormEvent(
-                        type="field_saved",
-                        data={
-                            "field_id": field.field_id,
+                # SAFETY CHECK: Validate before saving
+                is_valid, message = validate_field(field, value)
+                if not is_valid:
+                    responses.append(
+                        types.FunctionResponse(
+                            id=func_call.id,
+                            name=name,
+                            response={
+                                "ok": False,
+                                "message": f"Cannot save invalid value. Validation failed: {message}",
+                            },
+                        )
+                    )
+                else:
+                    form_state.record_value(field.field_id, value)
+                    form_state.advance()
+                    responses.append(
+                        types.FunctionResponse(
+                            id=func_call.id,
+                            name=name,
+                            response={
+                                "ok": True,
+                                "progress_percent": form_state.progress_percent(),
+                            },
+                        )
+                    )
+
+        elif name == "get_all_answers":
+            # Build list of all saved answers with field metadata
+            from ..core import FIELD_BY_ID
+
+            saved_fields = []
+            for field_id, value in form_state.answers.items():
+                # Get field definition from FIELD_BY_ID
+                field = FIELD_BY_ID.get(field_id)
+                if field:
+                    try:
+                        field_index = form_state.fields.index(field)
+                    except ValueError:
+                        field_index = -1
+                    saved_fields.append(
+                        {
+                            "field_id": field_id,
+                            "label": field.label,
                             "value": value,
-                            "progress_percent": form_state.progress_percent(),
+                            "field_index": field_index,
+                        }
+                    )
+
+            responses.append(
+                types.FunctionResponse(
+                    id=func_call.id,
+                    name=name,
+                    response={
+                        "saved_fields": saved_fields,
+                        "count": len(saved_fields),
+                        "current_index": form_state.current_index,
+                    },
+                )
+            )
+
+        elif name == "update_previous_field":
+            field_id = args.get("field_id", "")
+            value = args.get("value", "")
+
+            # Import FIELD_BY_ID for field lookup
+            from ..core import FIELD_BY_ID
+
+            # Validate field_id exists
+            if field_id not in FIELD_BY_ID:
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "message": f"Unknown field_id: {field_id}. Use get_all_answers to see valid field IDs.",
                         },
-                        session_id=session_id,
                     )
                 )
-                
+                continue
+
+            # Get field definition and index
+            field = FIELD_BY_ID[field_id]
+            try:
+                field_index = form_state.fields.index(field)
+            except ValueError:
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "message": f"Field {field_id} not in form fields list.",
+                        },
+                    )
+                )
+                continue
+
+            # SAFETY CHECK 1: Prevent updating fields not yet reached
+            if field_index >= form_state.current_index:
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "message": (
+                                f"Cannot update {field.label} - you haven't reached this field yet. "
+                                f"Current position: field {form_state.current_index}, "
+                                f"requested field position: {field_index}. "
+                                "You can only update previously saved fields."
+                            ),
+                        },
+                    )
+                )
+                continue
+
+            # SAFETY CHECK 2: Verify field was actually saved
+            if field_id not in form_state.answers:
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "message": f"Field {field.label} has no saved answer to update.",
+                        },
+                    )
+                )
+                continue
+
+            # Validate the new value
+            is_valid, message = validate_field(field, value)
+
+            if not is_valid:
+                responses.append(
+                    types.FunctionResponse(
+                        id=func_call.id,
+                        name=name,
+                        response={
+                            "ok": False,
+                            "is_valid": False,
+                            "message": f"Validation failed: {message}",
+                        },
+                    )
+                )
+            else:
+                # Update the value
+                old_value = form_state.answers[field_id]
+                form_state.record_value(field_id, value)
+
+                LOGGER.info(
+                    "Updated field %s (%s) from '%s' to '%s'",
+                    field_id,
+                    field.label,
+                    old_value,
+                    value,
+                )
+
                 responses.append(
                     types.FunctionResponse(
                         id=func_call.id,
                         name=name,
                         response={
                             "ok": True,
-                            "progress_percent": form_state.progress_percent(),
+                            "is_valid": True,
+                            "message": f"Successfully updated {field.label}",
+                            "old_value": old_value,
+                            "new_value": value,
                         },
                     )
                 )
