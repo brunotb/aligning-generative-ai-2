@@ -9,6 +9,7 @@ interface FormFieldListProps {
   sessionId: string | null;
   currentDraftValue: string;
   translatedLabels: Record<string, string>;
+  lastUpdatedFieldId: string | null;
 }
 
 export function FormFieldList({
@@ -18,6 +19,7 @@ export function FormFieldList({
   sessionId,
   currentDraftValue,
   translatedLabels,
+  lastUpdatedFieldId,
 }: FormFieldListProps) {
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -84,20 +86,25 @@ export function FormFieldList({
           const isEditing = editingFieldId === field.field_id;
           const displayValue = formatEnumValue(field, value);
           const translatedLabel = translatedLabels[field.field_id] || field.label;
-          
+
+          // Determine if this field should be highlighted (Blue Border + Blue BG)
+          // Priority: lastUpdatedFieldId > current index
+          const isHighlighted = lastUpdatedFieldId
+            ? field.field_id === lastUpdatedFieldId
+            : status === 'current';
+
           // Show draft value for current field if available
           const showDraftValue = status === 'current' && currentDraftValue && !value;
 
           return (
             <div
               key={field.field_id}
-              className={`p-4 rounded-lg border-2 transition-all ${
-                status === 'current'
-                  ? 'border-blue-500 bg-blue-50 shadow-md'
-                  : status === 'completed'
+              className={`p-4 rounded-lg border-2 transition-all ${isHighlighted
+                ? 'border-blue-500 bg-blue-50 shadow-md'
+                : status === 'completed'
                   ? 'border-green-200 bg-white hover:border-green-300'
                   : 'border-gray-200 bg-gray-50'
-              }`}
+                }`}
             >
               {/* Field Label */}
               <div className="flex items-start justify-between mb-2">
@@ -129,9 +136,8 @@ export function FormFieldList({
                     </svg>
                   )}
                   <h3
-                    ctranslatedLe={`font-semibold text-sm ${
-                      status === 'pending' ? 'text-gray-400' : 'text-gray-900'
-                    }`}
+                    className={`font-semibold text-sm ${status === 'pending' ? 'text-gray-400' : 'text-gray-900'
+                      }`}
                   >
                     {field.label}
                   </h3>
@@ -177,10 +183,10 @@ export function FormFieldList({
                   </div>
                 </div>
               ) : (showDraftValue ? (
-                    <p className="text-sm text-blue-600 italic animate-pulse">
-                      "{currentDraftValue}"
-                    </p>
-                  ) : 
+                <p className="text-sm text-blue-600 italic animate-pulse">
+                  "{currentDraftValue}"
+                </p>
+              ) :
                 <>
                   {value ? (
                     <p className="text-sm text-gray-700 font-medium">{displayValue}</p>

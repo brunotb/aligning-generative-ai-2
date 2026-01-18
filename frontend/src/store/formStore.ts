@@ -9,6 +9,7 @@ interface FormStore extends FormState {
   currentDraftValue: string; // Real-time value being discussed
   detectedLanguage: string | null; // User's language
   translatedLabels: Record<string, string>; // field_id -> translated label
+  lastUpdatedFieldId: string | null; // ID of the last field that was updated
 
   // Actions
   setSessionId: (id: string) => void;
@@ -38,6 +39,7 @@ const initialState = {
   currentDraftValue: '',
   detectedLanguage: null,
   translatedLabels: {},
+  lastUpdatedFieldId: null,
 };
 
 export const useFormStore = create<FormStore>((set, get) => ({
@@ -52,6 +54,7 @@ export const useFormStore = create<FormStore>((set, get) => ({
   setAnswer: (fieldId, value) =>
     set((state) => ({
       answers: { ...state.answers, [fieldId]: value },
+      lastUpdatedFieldId: fieldId,
     })),
 
   setProgress: (percent) => set({ progress_percent: percent }),
@@ -86,6 +89,7 @@ export const useFormStore = create<FormStore>((set, get) => ({
           fields: data.fields || [],
           current_index: data.current_index || 0,
           currentDraftValue: '', // Clear draft when field changes
+          lastUpdatedFieldId: null, // Reset highlight on init
         });
         // Update translated label if provided
         if (data.translated_label) {
@@ -106,6 +110,7 @@ export const useFormStore = create<FormStore>((set, get) => ({
           answers: { ...state.answers, [data.field_id]: data.value },
           progress_percent: data.progress_percent || state.progress_percent,
           currentDraftValue: '', // Clear draft after saving
+          lastUpdatedFieldId: data.field_id,
         }));
         break;
 
@@ -113,6 +118,7 @@ export const useFormStore = create<FormStore>((set, get) => ({
         set((state) => ({
           answers: { ...state.answers, [data.field_id]: data.value },
           progress_percent: data.progress_percent || state.progress_percent,
+          lastUpdatedFieldId: data.field_id,
         }));
         break;
 

@@ -15,6 +15,7 @@ export function ConversationScreen() {
     isRecording,
     currentDraftValue,
     translatedLabels,
+    lastUpdatedFieldId,
   } = useFormStore();
 
   const hasAnswers = Object.keys(answers).length > 0;
@@ -37,6 +38,7 @@ export function ConversationScreen() {
             translatedLabels={translatedLabels}
             answers={answers}
             sessionId={sessionId}
+            lastUpdatedFieldId={lastUpdatedFieldId}
           />
         </div>
 
