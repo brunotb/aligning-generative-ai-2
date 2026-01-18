@@ -48,7 +48,7 @@ export function ConversationScreen() {
       </div>
 
       {/* Debug Panel */}
-      <DebugPanel />
+      {/*<DebugPanel />*/}
     </div>
   );
 }
